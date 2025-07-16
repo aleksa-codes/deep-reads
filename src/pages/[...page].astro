@@ -94,3 +94,14 @@ const formatDate = (date: Date) => {
     }
   </div>
 </Layout>
+
+<script>
+  const urlParams = new URLSearchParams(window.location.hash.substring(1));
+  const tokenTypes = ['invite_token', 'confirmation_token', 'recovery_token', 'email_change_token'];
+
+  tokenTypes.forEach((tokenType) => {
+    if (urlParams.has(tokenType)) {
+      window.location.href = `/admin/#${tokenType}=${urlParams.get(tokenType)}`;
+    }
+  });
+</script>
