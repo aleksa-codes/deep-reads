@@ -1,6 +1,6 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { siteConfig } from '@/config/site.config';
+// import { siteConfig } from '@/config/site.config';
 
 const reads = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/reads' }),

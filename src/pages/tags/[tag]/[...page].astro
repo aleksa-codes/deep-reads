@@ -5,33 +5,31 @@ import Layout from '@/layouts/layout.astro';
 import Badge from '@/components/ui/badge.astro';
 import Pagination from '@/components/ui/pagination.astro';
 import { Icon } from 'astro-icon/components';
+import type { InferGetStaticPropsType, GetStaticPaths } from 'astro';
 
-export async function getStaticPaths({ paginate }: any) {
+export const getStaticPaths = (async ({ paginate }) => {
   const allReads = await getCollection('reads');
   const allTags = [...new Set(allReads.flatMap((read) => read.data.tags || []))];
 
-  // We need to generate paginated routes for each tag.
-  // We'll use flatMap to iterate over each tag and return an array of paginated pages for it.
   return allTags.flatMap((tag) => {
-    // 1. Filter reads for the current tag
     const filteredReads = allReads.filter((read) => read.data.tags?.includes(tag));
-    // 2. Sort the filtered reads
     const sortedReads = filteredReads.sort((a, b) => b.data.dateAdded.valueOf() - a.data.dateAdded.valueOf());
 
-    // 3. Paginate the filtered & sorted reads for this specific tag
     return paginate(sortedReads, {
-      params: { tag: tagToSlug(tag) }, // Sets the URL part, e.g., /tags/astro-tips
-      pageSize: 5, // How many articles per page
+      params: { tag: tagToSlug(tag) },
+      pageSize: 5,
       props: {
-        tag: tag, // Pass the original tag name as a prop to the page
-        allTags: allTags, // Pass all other tags for the "Explore" section
+        tag: tag,
+        allTags: allTags,
       },
     });
   });
-}
+}) satisfies GetStaticPaths;
 
-// The props now come from `paginate`
-const { page, tag, allTags } = Astro.props;
+// type Params = InferGetStaticParamsType<typeof getStaticPaths>;
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page, tag, allTags } = Astro.props as Props;
 
 // Format date for display
 const formatDate = (date: Date) => {

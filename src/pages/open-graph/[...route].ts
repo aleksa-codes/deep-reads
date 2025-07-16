@@ -4,14 +4,14 @@ import { OGImageRoute } from 'astro-og-canvas';
 export const { getStaticPaths, GET } = OGImageRoute({
   param: 'route',
 
-  pages: await getCollection('blog').then((posts) =>
+  pages: await getCollection('reads').then((posts) =>
     Object.fromEntries(
       posts.map((post) => [
         post.id,
         {
           title: post.data.title,
-          description: post.data.description,
-          thumbnail: post.data.thumbnail,
+          description: post.data.summary ?? '',
+          // thumbnail: post.data.thumbnail, // not present in schema
         },
       ]),
     ),
@@ -19,15 +19,9 @@ export const { getStaticPaths, GET } = OGImageRoute({
   getImageOptions: (_path, page) => ({
     title: page.title,
     description: page.description,
-    // bgImage: page.thumbnail
-    //   ? {
-    //       path: page.thumbnail,
-    //       fit: 'cover',
-    //     }
-    //   : undefined,
     logo: {
       path: './src/assets/tree-pine.png',
-      size: [48], // Width only, height will scale proportionally
+      size: [48],
     },
     font: {
       title: {
@@ -48,7 +42,7 @@ export const { getStaticPaths, GET } = OGImageRoute({
     bgGradient: [
       [34, 197, 94],
       [16, 185, 129],
-    ], // Green gradient
+    ],
     border: {
       color: [34, 197, 94],
       width: 20,

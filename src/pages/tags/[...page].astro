@@ -6,8 +6,9 @@ import Badge from '@/components/ui/badge.astro';
 import Button from '@/components/ui/button.astro';
 import Pagination from '@/components/ui/pagination.astro';
 import { Icon } from 'astro-icon/components';
+import type { InferGetStaticPropsType, GetStaticPaths } from 'astro';
 
-export async function getStaticPaths({ paginate }: any) {
+export const getStaticPaths = (async ({ paginate }) => {
   const reads = await getCollection('reads');
   const allTags = [...new Set(reads.flatMap((read) => read.data.tags || []))].sort();
 
@@ -23,12 +24,15 @@ export async function getStaticPaths({ paginate }: any) {
   const sortedTags = tagCounts.sort((a, b) => b.count - a.count);
 
   return paginate(sortedTags, {
-    pageSize: 9, // 3x3 grid
+    pageSize: 9,
     props: { totalReads: reads.length, allTagsCount: allTags.length },
   });
-}
+}) satisfies GetStaticPaths;
 
-const { page, totalReads, allTagsCount } = Astro.props;
+// type Params = InferGetStaticParamsType<typeof getStaticPaths>;
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page, totalReads, allTagsCount } = Astro.props as Props;
 ---
 
 <Layout title='Browse Tags - DeepReads' description='Explore all topics and tags on DeepReads' hideCTA={true}>

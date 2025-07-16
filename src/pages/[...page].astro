@@ -6,19 +6,22 @@ import { tagToSlug } from '@/lib/utils';
 import Badge from '@/components/ui/badge.astro';
 import Pagination from '@/components/ui/pagination.astro';
 import { Icon } from 'astro-icon/components';
+import type { InferGetStaticPropsType, GetStaticPaths } from 'astro';
 
-export async function getStaticPaths({ paginate }: any) {
+export const getStaticPaths = (async ({ paginate }) => {
   const reads = await getCollection('reads');
-  // Sort reads by most recent first
   const sortedReads = reads.sort((a, b) => b.data.dateAdded.valueOf() - a.data.dateAdded.valueOf());
 
   return paginate(sortedReads, {
-    pageSize: 5, // Adjusted for better vertical rhythm
+    pageSize: 5,
     props: {},
   });
-}
+}) satisfies GetStaticPaths;
 
-const { page } = Astro.props;
+// type Params = InferGetStaticParamsType<typeof getStaticPaths>;
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page } = Astro.props as Props;
 
 // Format date for display
 const formatDate = (date: Date) => {

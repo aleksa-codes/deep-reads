@@ -3,19 +3,18 @@ import { getCollection } from 'astro:content';
 import { siteConfig } from '@/config/site.config';
 
 export async function GET() {
-  const blog = await getCollection('blog');
-  const sortedPosts = blog.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  const reads = await getCollection('reads');
+  const sortedReads = reads.sort((a, b) => b.data.dateAdded.valueOf() - a.data.dateAdded.valueOf());
 
   return rss({
     title: siteConfig.title,
-    description: `The latest blog posts from ${siteConfig.title}`,
+    description: `The latest articles from ${siteConfig.title}`,
     site: import.meta.env.SITE,
-    items: sortedPosts.map((post) => ({
+    items: sortedReads.map((post) => ({
       title: post.data.title,
-      pubDate: post.data.date,
-      description: post.data.description,
-      link: `/blog/${post.id}/`,
-      author: post.data.author,
+      pubDate: post.data.dateAdded,
+      description: post.data.summary ?? '',
+      link: post.data.url,
     })),
     customData: `<language>${siteConfig.defaultLocale.toLowerCase()}</language>`,
     stylesheet: '/rss/styles.xsl',
