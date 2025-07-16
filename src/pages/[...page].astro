@@ -1,0 +1,93 @@
+---
+import { getCollection } from 'astro:content';
+import { siteConfig } from '@/config/site.config';
+import Layout from '@/layouts/layout.astro';
+import { tagToSlug } from '@/lib/utils';
+import Badge from '@/components/ui/badge.astro';
+import Pagination from '@/components/ui/pagination.astro';
+import { Icon } from 'astro-icon/components';
+
+export async function getStaticPaths({ paginate }: any) {
+  const reads = await getCollection('reads');
+  // Sort reads by most recent first
+  const sortedReads = reads.sort((a, b) => b.data.dateAdded.valueOf() - a.data.dateAdded.valueOf());
+
+  return paginate(sortedReads, {
+    pageSize: 5, // Adjusted for better vertical rhythm
+    props: {},
+  });
+}
+
+const { page } = Astro.props;
+
+// Format date for display
+const formatDate = (date: Date) => {
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+---
+
+<Layout title={siteConfig.title} description={siteConfig.description} hideCTA={true}>
+  <div class='container mx-auto max-w-4xl px-4 py-10'>
+    <!-- Reads Feed -->
+    <div class='space-y-8'>
+      {
+        page.data.map((read) => (
+          <article class='border-b pb-8 last:border-b-0 last:pb-0'>
+            <div class='text-muted-foreground mb-3 flex items-center gap-4 text-sm'>
+              <time datetime={read.data.dateAdded.toISOString()}>{formatDate(read.data.dateAdded)}</time>
+              <div class='flex flex-wrap gap-1'>
+                {read.data.tags.slice(0, 3).map((tag) => (
+                  <Badge as='a' href={`/tags/${tagToSlug(tag)}/`} variant='secondary' class='font-normal'>
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <h2 class='text-foreground mb-3 text-2xl font-bold tracking-tight'>
+              <a href={`/read/${read.id}/`} class='hover:text-primary transition-colors'>
+                {read.data.title}
+              </a>
+            </h2>
+
+            {read.data.summary && (
+              <p class='text-muted-foreground mb-4 line-clamp-3 text-base leading-relaxed'>{read.data.summary}</p>
+            )}
+
+            <a
+              href={`/read/${read.id}/`}
+              class='text-primary inline-flex items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-80'
+            >
+              Read more
+              <Icon name='lucide:arrow-right' class='h-4 w-4' />
+            </a>
+          </article>
+        ))
+      }
+    </div>
+
+    <!-- Empty State -->
+    {
+      page.data.length === 0 && (
+        <div class='bg-muted/50 flex flex-col items-center justify-center rounded-lg border-2 border-dashed py-24 text-center'>
+          <Icon name='lucide:archive' class='text-muted-foreground h-12 w-12' />
+          <h2 class='text-foreground mt-4 text-2xl font-semibold tracking-tight'>No Reads Yet</h2>
+          <p class='text-muted-foreground mt-2'>Check back later for new articles and insights.</p>
+        </div>
+      )
+    }
+
+    <!-- Pagination -->
+    {
+      page.lastPage > 1 && (
+        <div class='mt-12'>
+          <Pagination {page} />
+        </div>
+      )
+    }
+  </div>
+</Layout>

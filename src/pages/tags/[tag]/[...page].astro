@@ -1,0 +1,128 @@
+---
+import { getCollection } from 'astro:content';
+import { tagToSlug } from '@/lib/utils';
+import Layout from '@/layouts/layout.astro';
+import Badge from '@/components/ui/badge.astro';
+import Pagination from '@/components/ui/pagination.astro';
+import { Icon } from 'astro-icon/components';
+
+export async function getStaticPaths({ paginate }: any) {
+  const allReads = await getCollection('reads');
+  const allTags = [...new Set(allReads.flatMap((read) => read.data.tags || []))];
+
+  // We need to generate paginated routes for each tag.
+  // We'll use flatMap to iterate over each tag and return an array of paginated pages for it.
+  return allTags.flatMap((tag) => {
+    // 1. Filter reads for the current tag
+    const filteredReads = allReads.filter((read) => read.data.tags?.includes(tag));
+    // 2. Sort the filtered reads
+    const sortedReads = filteredReads.sort((a, b) => b.data.dateAdded.valueOf() - a.data.dateAdded.valueOf());
+
+    // 3. Paginate the filtered & sorted reads for this specific tag
+    return paginate(sortedReads, {
+      params: { tag: tagToSlug(tag) }, // Sets the URL part, e.g., /tags/astro-tips
+      pageSize: 5, // How many articles per page
+      props: {
+        tag: tag, // Pass the original tag name as a prop to the page
+        allTags: allTags, // Pass all other tags for the "Explore" section
+      },
+    });
+  });
+}
+
+// The props now come from `paginate`
+const { page, tag, allTags } = Astro.props;
+
+// Format date for display
+const formatDate = (date: Date) => {
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+---
+
+<Layout title={`Posts tagged with "${tag}"`} description={`Browse all articles about ${tag}`} hideCTA={true}>
+  <div class='container mx-auto max-w-4xl px-4 py-10'>
+    <!-- Page Header -->
+    <div class='mb-8 border-b pb-8 text-center'>
+      <p class='text-muted-foreground text-sm font-semibold tracking-wider uppercase'>Topic</p>
+      <h1 class='text-foreground mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl'>{tag}</h1>
+      <p class='text-muted-foreground mt-4 text-lg'>
+        A collection of {page.total} article{page.total !== 1 ? 's' : ''} on this topic.
+      </p>
+    </div>
+
+    <!-- Articles Feed -->
+    <div class='space-y-8'>
+      {
+        page.data.map((read) => (
+          <article>
+            <div class='text-muted-foreground mb-3 flex items-center gap-4 text-sm'>
+              <time datetime={read.data.dateAdded.toISOString()}>{formatDate(read.data.dateAdded)}</time>
+              <div class='flex flex-wrap gap-1'>
+                {read.data.tags.slice(0, 3).map((articleTag) => (
+                  <Badge
+                    as='a'
+                    href={`/tags/${tagToSlug(articleTag)}/`}
+                    variant={articleTag === tag ? 'default' : 'secondary'}
+                    class='font-normal'
+                  >
+                    {articleTag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <h2 class='text-foreground mb-3 text-2xl font-bold tracking-tight'>
+              <a href={`/read/${read.id}/`} class='hover:text-primary transition-colors'>
+                {read.data.title}
+              </a>
+            </h2>
+
+            {read.data.summary && (
+              <p class='text-muted-foreground mb-4 line-clamp-3 text-base leading-relaxed'>{read.data.summary}</p>
+            )}
+
+            <a
+              href={`/read/${read.id}/`}
+              class='text-primary inline-flex items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-80'
+            >
+              Read more
+              <Icon name='lucide:arrow-right' class='h-4 w-4' />
+            </a>
+          </article>
+        ))
+      }
+    </div>
+
+    <!-- Pagination -->
+    {
+      page.lastPage > 1 && (
+        <div class='mt-12'>
+          <Pagination {page} />
+        </div>
+      )
+    }
+
+    <!-- Explore Other Tags -->
+    {
+      allTags.length > 1 && (
+        <div class='mt-16 border-t pt-10'>
+          <h3 class='text-foreground mb-4 text-lg font-semibold'>Explore Other Topics</h3>
+          <div class='flex flex-wrap gap-2'>
+            {allTags
+              .filter((t) => t !== tag)
+              .slice(0, 15) // Show a max of 15 other tags to keep it clean
+              .map((otherTag) => (
+                <Badge as='a' href={`/tags/${tagToSlug(otherTag)}/`} variant='outline'>
+                  {otherTag}
+                </Badge>
+              ))}
+          </div>
+        </div>
+      )
+    }
+  </div>
+</Layout>

@@ -1,0 +1,98 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '@/layouts/layout.astro';
+import Badge from '@/components/ui/badge.astro';
+import Button from '@/components/ui/button.astro';
+import { Icon } from 'astro-icon/components';
+import { tagToSlug } from '@/lib/utils';
+
+export async function getStaticPaths() {
+  const reads = await getCollection('reads');
+  return reads.map((read) => ({
+    params: { id: read.id },
+    props: { read },
+  }));
+}
+
+const { read } = Astro.props;
+const { Content } = await render(read);
+
+const formatDate = (date: Date) => {
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+---
+
+<Layout
+  title={`${read.data.title} - DeepReads`}
+  description={read.data.summary || `Read about ${read.data.title}`}
+  hideCTA={true}
+>
+  <article class='container mx-auto max-w-4xl px-4 py-12'>
+    <!-- Article Header -->
+    <header class='mb-8 border-b pb-8'>
+      <div class='text-muted-foreground mb-4 flex items-center space-x-4 text-sm'>
+        <span>Added on {formatDate(read.data.dateAdded)}</span>
+      </div>
+      <h1 class='text-foreground mb-4 text-3xl font-extrabold tracking-tight lg:text-5xl'>
+        {read.data.title}
+      </h1>
+      {read.data.summary && <p class='text-muted-foreground text-lg lg:text-xl'>{read.data.summary}</p>}
+      <!-- Tags -->
+      <div class='mt-6 flex flex-wrap gap-2'>
+        {
+          read.data.tags.map((tag) => (
+            <Badge as='a' href={`/tags/${tagToSlug(tag)}/`} variant='secondary'>
+              #{tag}
+            </Badge>
+          ))
+        }
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class='py-4'>
+      <div class='prose prose-slate dark:prose-invert max-w-none'>
+        <Content />
+      </div>
+
+      <!-- Action Buttons -->
+      <div class='mt-10 flex flex-wrap items-center gap-4 border-t pt-8'>
+        <Button href={read.data.url} target='_blank' rel='noopener noreferrer' size='lg'>
+          <Icon name='lucide:external-link' class='mr-2 h-4 w-4' />
+          Read Original
+        </Button>
+        <Button href='#' variant='outline' size='lg'>
+          <Icon name='lucide:share-2' class='mr-2 h-4 w-4' />
+          Share
+        </Button>
+      </div>
+
+      <!-- Source Info Box -->
+      <div class='bg-muted mt-12 rounded-lg border p-6'>
+        <div class='flex items-start gap-4'>
+          <Icon name='lucide:info' class='text-muted-foreground h-5 w-5 shrink-0' />
+          <div>
+            <h3 class='text-foreground font-semibold'>About This Entry</h3>
+            <div class='text-muted-foreground mt-1 space-y-2 text-sm'>
+              <p>
+                This content was originally published at{' '}
+                <a
+                  href={read.data.url}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  class='text-primary font-medium underline-offset-4 hover:underline'
+                >
+                  {new URL(read.data.url).hostname}
+                </a>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </article>
+</Layout>

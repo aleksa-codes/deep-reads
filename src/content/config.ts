@@ -2,17 +2,16 @@ import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { siteConfig } from '@/config/site.config';
 
-const blog = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
-  schema: ({ image }) =>
+const reads = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/reads' }),
+  schema: () =>
     z.object({
       title: z.string(),
-      description: z.string(),
-      date: z.coerce.date(),
-      author: z.string().default(siteConfig.author),
-      thumbnail: image(),
+      url: z.string().url(),
+      summary: z.string().optional(),
       tags: z.array(z.string()).default([]),
+      dateAdded: z.coerce.date(),
     }),
 });
 
-export const collections = { blog };
+export const collections = { reads };

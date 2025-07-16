@@ -1,11 +1,10 @@
 ---
-import Navbar from '@/components/navbar.astro';
 import CTA from '@/components/sections/CTA.astro';
 import Footer from '@/components/footer.astro';
-import TailwindIndicator from '@/components/tailwind-indicator.astro';
 import BaseHead from '@/components/base-head.astro';
-import Snow from '@/components/snow.astro';
-import ChatWidget from '@/components/chat-widget.astro';
+import TailwindIndicator from '@/components/tailwind-indicator.astro';
+import ThemeToggle from '@/components/theme-toggle.astro';
+import { cn } from '@/lib/utils'; // Assuming you have a utility for merging classes like in shadcn/ui
 
 interface Props {
   title: string;
@@ -16,6 +15,7 @@ interface Props {
   nofollow?: boolean;
   twitterCreator?: string;
   twitterSite?: string;
+  hideCTA?: boolean;
   schema?: {
     type: string;
     date?: Date;
@@ -24,30 +24,71 @@ interface Props {
   };
 }
 
-const { title, description, image, ogType, schema, noindex, nofollow, twitterCreator, twitterSite } = Astro.props;
+const { title, description, image, ogType, schema, noindex, nofollow, twitterCreator, twitterSite, hideCTA } =
+  Astro.props;
 ---
 
 <!doctype html>
 <html lang='en'>
-  <BaseHead
-    title={title}
-    description={description}
-    image={image}
-    ogType={ogType}
-    noindex={noindex}
-    nofollow={nofollow}
-    twitterCreator={twitterCreator}
-    twitterSite={twitterSite}
-    schema={schema}
-  />
-  <body class='min-h-screen max-w-screen overflow-x-hidden antialiased'>
-    <Navbar />
-    <Snow />
-    <main>
+  <head>
+    <BaseHead
+      title={title}
+      description={description}
+      image={image}
+      ogType={ogType}
+      noindex={noindex}
+      nofollow={nofollow}
+      twitterCreator={twitterCreator}
+      twitterSite={twitterSite}
+      schema={schema}
+    />
+  </head>
+  <body class='bg-background min-h-screen font-sans antialiased'>
+    <header class='bg-card border-b'>
+      <div class='container mx-auto flex flex-col items-center px-4 pt-8 pb-4 text-center'>
+        <div class='mb-2 flex w-full items-center justify-center'>
+          <h1
+            class='from-primary via-chart-2 to-chart-3 bg-gradient-to-r bg-clip-text text-4xl font-extrabold tracking-tight text-transparent drop-shadow-sm'
+          >
+            DeepReads
+          </h1>
+          <div class='ml-3'>
+            <ThemeToggle />
+          </div>
+        </div>
+        <p class='text-muted-foreground mb-6 text-lg'>Your daily digest of what matters</p>
+        <nav class='flex justify-center'>
+          <div class='bg-muted flex gap-2 rounded-full p-1 shadow-sm'>
+            <a
+              href='/'
+              class={cn(
+                'rounded-full px-5 py-2 text-base font-medium transition-colors',
+                !Astro.url.pathname.startsWith('/tags')
+                  ? 'bg-primary text-primary-foreground shadow'
+                  : 'text-secondary-foreground hover:bg-accent hover:text-accent-foreground',
+              )}
+            >
+              Reads
+            </a>
+            <a
+              href='/tags/'
+              class={cn(
+                'rounded-full px-5 py-2 text-base font-medium transition-colors',
+                Astro.url.pathname.startsWith('/tags')
+                  ? 'bg-primary text-primary-foreground shadow'
+                  : 'text-secondary-foreground hover:bg-accent hover:text-accent-foreground',
+              )}
+            >
+              Tags
+            </a>
+          </div>
+        </nav>
+      </div>
+    </header>
+    <main class='container mx-auto px-4 py-8'>
       <slot />
     </main>
-    <CTA />
-    <ChatWidget />
+    {!hideCTA && <CTA />}
     <Footer />
     <TailwindIndicator />
   </body>

@@ -1,0 +1,45 @@
+---
+import Button from '@/components/ui/button.astro';
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  page: {
+    currentPage: number;
+    lastPage: number;
+    url: {
+      prev?: string;
+      next?: string;
+    };
+  };
+}
+
+const { page } = Astro.props;
+---
+
+{
+  page.lastPage > 1 && (
+    <div class='mt-12 flex items-center justify-center gap-2'>
+      <Button
+        href={page.url.prev || '#'}
+        variant='outline'
+        size='icon'
+        disabled={!page.url.prev}
+        aria-label='Previous Page'
+      >
+        <Icon name='lucide:chevron-left' />
+      </Button>
+      <div class='border-border h-10 rounded-md border px-4 py-2 text-sm'>
+        Page {page.currentPage} of {page.lastPage}
+      </div>
+      <Button
+        href={page.url.next || '#'}
+        variant='outline'
+        size='icon'
+        disabled={!page.url.next}
+        aria-label='Next Page'
+      >
+        <Icon name='lucide:chevron-right' />
+      </Button>
+    </div>
+  )
+}

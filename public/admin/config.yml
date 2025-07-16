@@ -1,13 +1,14 @@
 backend:
   name: git-gateway # or test-repo
+  # name: test-repo
   branch: main
   squash_merges: true
 
 local_backend: true
 
 # Media
-media_folder: 'src/assets/blog'
-public_folder: 'src/assets/blog'
+media_folder: 'src/assets/reads'
+public_folder: 'src/assets/reads'
 # media_library:
 #   name: cloudinary
 #   max_file_size: 512000 # 512kb
@@ -17,56 +18,55 @@ public_folder: 'src/assets/blog'
 # publish_mode: editorial_workflow
 
 # Site URL for preview
-site_url: https://forestdesigns.netlify.app
-display_url: https://forestdesigns.netlify.app
+site_url: https://deepreads.netlify.app
+display_url: https://deepreads.netlify.app
 
 # Collections
 collections:
-  - name: 'blog'
-    label: 'Blog'
-    folder: 'src/content/blog'
+  - name: 'reads'
+    label: 'Reads'
+    folder: 'src/content/reads'
     create: true
     slug: '{{slug}}'
-    preview_path: '/blog/{{slug}}'
-    sortable_fields: ['date', 'title']
+    preview_path: '/reads/#{{slug}}'
+    sortable_fields: ['dateAdded', 'title']
     fields:
       - {
           label: 'Title',
           name: 'title',
           widget: 'string',
-          pattern: ['.{5,100}', 'Must be between 5 and 100 characters'],
-          hint: 'The main title of your post',
+          pattern: ['.{10,150}', 'Must be between 10 and 150 characters'],
+          hint: 'The title of the article or read',
         }
       - {
-          label: 'Description',
-          name: 'description',
+          label: 'URL',
+          name: 'url',
+          widget: 'string',
+          pattern: ['^https?://.+', 'Must be a valid URL starting with http:// or https://'],
+          hint: 'The external URL to the article',
+        }
+      - {
+          label: 'Summary',
+          name: 'summary',
           widget: 'text',
-          pattern: ['.{10,160}', 'Must be between 10 and 160 characters'],
-          hint: 'A brief description for SEO and social sharing',
-        }
-      - { label: 'Publish Date', name: 'date', widget: 'datetime', format: 'YYYY-MM-DD' }
-      - { label: 'Author', name: 'author', widget: 'string', default: 'Forest Designs' }
-      - {
-          label: 'Featured Image',
-          name: 'thumbnail',
-          widget: 'image',
           required: false,
-          allow_multiple: false,
-          hint: 'Main image for the post',
+          pattern: ['.{0,300}', 'Must be 300 characters or less'],
+          hint: 'Optional brief summary of the article',
         }
       - {
           label: 'Tags',
           name: 'tags',
-          widget: 'select',
-          multiple: true,
-          options: ['Web Design', 'SEO'],
-          hint: 'Choose tags for your post',
+          widget: 'list',
+          allow_add: true,
+          default: [],
+          hint: 'Add custom tags for categorization (press Enter to add each tag)',
           required: false,
         }
       - {
-          label: 'Body',
-          name: 'body',
-          widget: 'markdown',
-          hint: 'The main content of your post',
-          editor_components: ['image'],
+          label: 'Date Added',
+          name: 'dateAdded',
+          widget: 'datetime',
+          format: 'YYYY-MM-DD',
+          default: '',
+          hint: 'When this read was added to the collection',
         }

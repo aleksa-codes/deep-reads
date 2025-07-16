@@ -1,9 +1,9 @@
 export const siteConfig = {
   // Basic site info
-  title: 'Forest Designs',
-  author: 'Forest Designs',
-  description: 'We design and develop beautiful websites that help you stand out from the competition.',
-  url: 'https://forestdesigns.netlify.app',
+  title: 'DeepReads',
+  author: 'DeepReads',
+  description: 'A curated collection of deep, insightful articles and reads from across the web.',
+  url: 'https://deepreads.netlify.app',
 
   // SEO & Metadata
   defaultLocale: 'en_US',
@@ -16,25 +16,11 @@ export const siteConfig = {
   // Contact Information
   contact: {
     phone: '(123) 456-7890',
-    email: 'contact@forestdesigns.com',
+    email: 'contact@deepreads.com',
   },
 
   // Navigation
-  navigation: [
-    { href: '/', label: 'Home' },
-    { href: '/design/', label: 'Design' },
-    {
-      href: '/our-work/',
-      label: 'Our Work',
-      dropdown: [
-        { href: '/our-work/websites/', label: 'Websites' },
-        { href: '/our-work/applications/', label: 'Applications' },
-        { href: '/our-work/marketing/', label: 'Marketing' },
-      ],
-    },
-    { href: '/blog/', label: 'Blog' },
-    { href: '/components/', label: 'Components' },
-  ],
+  navigation: [{ href: '/', label: 'Home' }],
 };
 
 export type SiteConfig = typeof siteConfig;
