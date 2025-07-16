@@ -20,7 +20,10 @@ export const siteConfig = {
   },
 
   // Navigation
-  navigation: [{ href: '/', label: 'Home' }],
+  navigation: [
+    { href: '/reads', label: 'Reads' },
+    { href: '/tags', label: 'Tags' },
+  ],
 };
 
 export type SiteConfig = typeof siteConfig;

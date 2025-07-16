@@ -1,0 +1,12 @@
+---
+import { auth } from '@/lib/auth';
+export const prerender = false;
+const session = await auth.api.getSession({ headers: Astro.request.headers });
+---
+
+<html>
+  <body>
+    <h1>Dashboard</h1>
+    <p>Welcome, {session?.user?.name ?? 'Guest'}!</p>
+  </body>
+</html>

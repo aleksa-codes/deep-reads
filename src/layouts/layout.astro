@@ -4,7 +4,20 @@ import Footer from '@/components/footer.astro';
 import BaseHead from '@/components/base-head.astro';
 import TailwindIndicator from '@/components/tailwind-indicator.astro';
 import ThemeToggle from '@/components/theme-toggle.astro';
-import { cn } from '@/lib/utils'; // Assuming you have a utility for merging classes like in shadcn/ui
+import Search from '@/components/search'; // Ensure this is using the .tsx extension
+import AuthButton from '@/components/auth-button'; // 1. Import the new React component
+import { cn } from '@/lib/utils';
+// import { auth } from '@/lib/auth'; // Import the auth client
+// You can optionally get the session here if you need it for server-rendered content
+// but the React component will handle its own state on the client.
+// import { auth } from '../lib/auth';
+// const session = await auth.api.getSession({ headers: Astro.request.headers });
+
+// export const prerender = false; // Not needed in 'server' mode
+
+// const session = await auth.api.getSession({
+//   headers: Astro.request.headers,
+// });
 
 interface Props {
   title: string;
@@ -45,18 +58,29 @@ const { title, description, image, ogType, schema, noindex, nofollow, twitterCre
   </head>
   <body class='bg-background min-h-screen font-sans antialiased'>
     <header class='bg-card border-b'>
-      <div class='container mx-auto flex flex-col items-center px-4 pt-8 pb-4 text-center'>
-        <div class='mb-2 flex w-full items-center justify-center'>
+      <div class='container mx-auto flex flex-col items-center px-4 pt-8 pb-6 text-center'>
+        <div class='mb-2 flex w-full items-center'>
+          {/* Logo takes up remaining space and is centered by the parent's items-center */}
+          <div class='flex-1'></div>
           <h1
             class='from-primary via-chart-2 to-chart-3 bg-gradient-to-r bg-clip-text text-4xl font-extrabold tracking-tight text-transparent drop-shadow-sm'
           >
             DeepReads
           </h1>
-          <div class='ml-3'>
+          {/* Container for right-aligned items */}
+          <div class='ml-auto flex flex-1 items-center justify-end gap-4'>
             <ThemeToggle />
+            <AuthButton client:load />
+            {/* 2. Add the component with client:load */}
           </div>
         </div>
+
         <p class='text-muted-foreground mb-6 text-lg'>Your daily digest of what matters</p>
+
+        <div class='mb-6 w-full max-w-md'>
+          <Search client:load />
+        </div>
+
         <nav class='flex justify-center'>
           <div class='bg-muted flex gap-2 rounded-full p-1 shadow-sm'>
             <a
