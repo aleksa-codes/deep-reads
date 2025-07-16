@@ -1,0 +1,50 @@
+---
+import { cn } from '@/lib/utils';
+
+interface Props {
+  text: string;
+  direction?: 'top' | 'bottom' | 'left' | 'right';
+  variant?: 'default' | 'outline' | 'destructive';
+  class?: string;
+}
+
+const { text, direction = 'top', variant = 'default', class: extraClass } = Astro.props;
+
+const directionClass = {
+  top: 'bottom-full left-1/2 transform -translate-x-1/2 mb-2',
+  bottom: 'top-full left-1/2 transform -translate-x-1/2 mt-2',
+  left: 'right-full top-1/2 transform -translate-y-1/2 mr-2',
+  right: 'left-full top-1/2 transform -translate-y-1/2 ml-2',
+}[direction];
+
+const arrowClasses = {
+  top: 'bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2',
+  bottom: 'top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2',
+  left: 'right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2',
+  right: 'left-0 top-1/2 transform -translate-x-1/2 -translate-y-1/2',
+}[direction];
+
+const variantClasses = {
+  default: 'bg-primary text-primary-foreground [&>div]:bg-primary',
+  outline:
+    'bg-background text-foreground border border-input [&>div]:bg-background [&>div]:border-b [&>div]:border-r [&>div]:border-input',
+  destructive: 'bg-destructive text-destructive-foreground [&>div]:bg-destructive',
+}[variant];
+---
+
+<div class={cn('group relative inline-block', extraClass)}>
+  <slot />
+  <div
+    class={cn(
+      'absolute z-10 whitespace-nowrap rounded-md px-3 py-2 text-sm',
+      'opacity-0 pointer-events-none transition-opacity duration-200',
+      'group-hover:opacity-100',
+      variantClasses,
+      directionClass,
+    )}
+    role='tooltip'
+  >
+    {text}
+    <div class={cn('absolute size-2 rotate-45', arrowClasses)}></div>
+  </div>
+</div>

@@ -1,0 +1,91 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Breadcrumb from '@/components/breadcrumb.astro';
+import Layout from '@/layouts/layout.astro';
+import { siteConfig } from '@/config/site.config';
+import { Image } from 'astro:assets';
+import Badge from '@/components/ui/badge.astro';
+import { tagToSlug } from '@/lib/utils';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { title, description, date, author, thumbnail, tags } = post.data;
+
+// Generate OG image URL
+const ogImage = new URL(`/open-graph/${post.id}.png`, Astro.url).toString();
+
+// Format date for display
+const readableDate = date.toLocaleDateString('en-us', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<Layout
+  title={title}
+  description={description}
+  image={ogImage}
+  ogType='article'
+  twitterCreator={siteConfig.twitter.creator}
+  twitterSite={siteConfig.twitter.site}
+  schema={{
+    type: 'BlogPosting',
+    date,
+    author,
+    tags,
+  }}
+>
+  <section class='bg-muted space-y-4 py-16'>
+    <div class='container'>
+      <Breadcrumb />
+      <div class='mx-auto max-w-4xl space-y-4'>
+        <h1 class='text-foreground text-4xl font-bold tracking-tight sm:text-5xl'>{title}</h1>
+        <div class='text-muted-foreground flex items-center gap-4'>
+          <time datetime={date.toISOString()}>{readableDate}</time>
+          <span>•</span>
+          <span>{author}</span>
+        </div>
+        {
+          thumbnail && (
+            <div class='relative aspect-[16/9] overflow-hidden rounded-lg'>
+              <Image
+                src={thumbnail}
+                alt={title}
+                loading={'eager'}
+                format={'webp'}
+                quality={'max'}
+                class='absolute inset-0 size-full object-cover'
+              />
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class='bg-background container py-16'>
+    <div class='mx-auto max-w-4xl'>
+      <article
+        class='prose prose-slate dark:prose-invert lg:prose-lg prose-headings:font-bold prose-headings:tracking-tight prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-p:text-muted-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-blockquote:text-muted-foreground prose-strong:text-foreground prose-code:before:hidden prose-code:after:hidden prose-img:rounded-lg prose-hr:border-muted-foreground/20 mx-auto w-full max-w-none'
+      >
+        <slot />
+      </article>
+
+      {
+        tags?.length > 0 && (
+          <div class='mx-auto flex flex-wrap gap-2'>
+            {tags.map((tag) => (
+              <Badge as='a' href={`/blog/${tagToSlug(tag)}/`} variant='outline' size='sm'>
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </section>
+</Layout>

@@ -1,0 +1,92 @@
+---
+import { Icon } from 'astro-icon/components';
+import Button from '@/components/ui/button.astro';
+
+const features = [
+  {
+    title: 'Modern Web Solutions',
+    description:
+      'Crafting contemporary websites that combine stunning design with optimal performance. Experience a seamless development process with regular updates and transparent communication.',
+    icon: 'lucide:zap',
+    testimonial: {
+      quote: 'The attention to detail and modern approach exceeded our expectations!',
+      author: 'Michael',
+      company: 'TechVision Labs',
+    },
+  },
+  {
+    title: 'Flexible & Transparent Process',
+    description:
+      'Simple collaboration through direct communication channels. Our agile approach means quick iterations and continuous improvements, with full visibility into project progress.',
+    icon: 'lucide:check-circle',
+    testimonial: {
+      quote: 'Their transparent process made the entire development journey smooth and enjoyable.',
+      author: 'Sarah',
+      company: 'Wellness Hub',
+    },
+  },
+  {
+    title: 'Tailored to Your Needs',
+    description:
+      'Every project is unique, and so is our approach. From startups needing their first web presence to established businesses requiring a digital transformation, we adapt our solutions to match your goals.',
+    icon: 'lucide:layout',
+    testimonial: {
+      quote: 'They understood our vision perfectly and brought it to life beautifully.',
+      author: 'David',
+      company: 'Innovation Spark',
+    },
+  },
+];
+---
+
+<section id='about' class='bg-background py-16 sm:py-20 md:py-24 lg:py-32'>
+  <div class='container'>
+    <div class='text-center'>
+      <h2 class='text-primary text-base font-semibold tracking-wide uppercase'>Our Approach</h2>
+      <p class='text-foreground mt-4 text-3xl font-bold tracking-tight sm:text-4xl'>
+        Building Digital Excellence Together
+      </p>
+      <p class='text-muted-foreground mx-auto mt-4 max-w-3xl text-lg'>
+        We create websites that not only look impressive but deliver real results. Our focus on performance, user
+        experience, and modern development practices ensures your digital presence stands out in today's competitive
+        landscape.
+      </p>
+    </div>
+
+    <div class='mt-16 grid gap-8 sm:mt-20 lg:grid-cols-3'>
+      {
+        features.map((feature) => (
+          <div class='group bg-muted hover:bg-muted/80 relative rounded-2xl p-8'>
+            <div class='bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg'>
+              <Icon name={feature.icon} class='text-primary h-6 w-6' />
+            </div>
+
+            <h3 class='text-foreground mt-6 text-xl font-semibold'>{feature.title}</h3>
+
+            <p class='text-muted-foreground mt-2'>{feature.description}</p>
+
+            <a
+              href='#'
+              class='text-secondary hover:text-secondary/80 mt-4 inline-flex items-center text-sm font-medium'
+            >
+              Learn more
+              <Icon name='lucide:arrow-right' class='ml-1 h-4 w-4' />
+            </a>
+
+            <div class='border-border mt-8 border-t pt-8'>
+              <p class='text-muted-foreground text-base italic'>"{feature.testimonial.quote}"</p>
+              <div class='mt-4'>
+                <p class='text-foreground text-sm font-medium'>{feature.testimonial.author}</p>
+                <p class='text-muted-foreground text-sm'>{feature.testimonial.company}</p>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class='mt-12 text-center sm:mt-16'>
+      <Button href='#pricing' size='lg'>Get Started</Button>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,101 @@
+---
+import { Icon } from 'astro-icon/components';
+import Button from '@/components/ui/button.astro';
+import { siteConfig } from '@/config/site.config';
+---
+
+<footer class='container'>
+  <div class='flex flex-col gap-8 py-12 lg:flex-row lg:items-center lg:justify-between'>
+    <!-- Logo -->
+    <div class='h-20 w-20 sm:h-24 sm:w-24'>
+      <div class='bg-primary/5 ring-primary/20 flex size-full items-center justify-center rounded-2xl ring-1'>
+        <Icon name='lucide:tree-pine' class='text-primary h-12 w-12 sm:h-14 sm:w-14' />
+      </div>
+    </div>
+
+    <div class='flex flex-wrap gap-x-24 gap-y-8'>
+      <!-- Navigation -->
+      <div class='space-y-4'>
+        <h3 class='font-medium'>Navigation</h3>
+        <nav class='text-muted-foreground flex flex-col gap-2'>
+          {
+            siteConfig.navigation.map((item) => (
+              <a href={item.href} class='hover:text-primary' aria-label={item.label}>
+                {item.label}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+
+      <!-- Contact -->
+      <div class='space-y-4'>
+        <h3 class='font-medium'>Contact</h3>
+        <div class='text-muted-foreground flex flex-col gap-2'>
+          <a href={`tel:${siteConfig.contact.phone}`} class='hover:text-primary flex items-center gap-2'>
+            <Icon name='lucide:phone' class='h-4 w-4' />
+            {siteConfig.contact.phone}
+          </a>
+          <a href='/contact/' class='hover:text-primary flex items-center gap-2'>
+            <Icon name='lucide:mail' class='h-4 w-4' />
+            Send a message
+          </a>
+        </div>
+      </div>
+
+      <!-- Social -->
+      <div class='space-y-4'>
+        <h3 class='font-medium'>Social</h3>
+        <div class='text-muted-foreground flex gap-2'>
+          <Button href='#' variant='ghost' size='icon' aria-label='Facebook'>
+            <Icon name='lucide:facebook' />
+          </Button>
+          <Button href='#' variant='ghost' size='icon' aria-label='Twitter'>
+            <Icon name='lucide:twitter' />
+          </Button>
+          <Button href='#' variant='ghost' size='icon' aria-label='Instagram'>
+            <Icon name='lucide:instagram' />
+          </Button>
+          <Button href='#' variant='ghost' size='icon' aria-label='LinkedIn'>
+            <Icon name='lucide:linkedin' />
+          </Button>
+        </div>
+      </div>
+
+      <!-- Newsletter -->
+      <div class='space-y-4'>
+        <h3 class='font-medium'>Stay Updated</h3>
+        <p class='text-muted-foreground text-sm'>Sign up for our latest news and updates.</p>
+        <form class='relative'>
+          <input
+            type='email'
+            placeholder='Email address...'
+            class='border-border/40 bg-background ring-offset-background placeholder:text-muted-foreground/60 focus:ring-primary/20 w-full rounded-md border px-4 py-2.5 pr-12 text-sm focus:ring-2 focus:outline-hidden'
+            aria-label='Email address'
+          />
+          <Button
+            type='submit'
+            variant='ghost'
+            size='icon'
+            class='absolute top-1/2 right-2 size-8 -translate-y-1/2'
+            aria-label='Subscribe to newsletter'
+          >
+            <Icon name='lucide:arrow-right' />
+          </Button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class='border-t py-4'>
+    <div class='text-muted-foreground flex flex-col items-start gap-4 text-sm lg:flex-row lg:justify-between'>
+      <div class='flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4'>
+        <p>&copy; {new Date().getFullYear()} {siteConfig.title}. All rights reserved.</p>
+        <div class='flex gap-4'>
+          <a href='/terms-of-use' class='hover:text-primary'>Terms of Use</a>
+          <a href='/privacy-policy' class='hover:text-primary'>Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

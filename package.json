@@ -1,0 +1,47 @@
+{
+  "license": "MIT",
+  "name": "astro-tailwind-decapcms-starterkit",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "astro": "astro",
+    "dev": "astro dev --host",
+    "start": "astro dev",
+    "sync": "astro sync",
+    "build:tailwind": "bun x @tailwindcss/cli -i src/styles/global.css -o dist/global.css --minify",
+    "build:postcss": "postcss dist/global.css -o dist/global.css",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,md,css,html,yaml,astro}\"",
+    "build": "astro check && astro build && bun run build:tailwind && bun run build:postcss",
+    "preview": "astro preview --host",
+    "prod": "bun run prettier && bun run build && bun run preview",
+    "decap": "bun x decap-server"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/rss": "^4.0.12",
+    "@astrojs/sitemap": "^3.4.1",
+    "@tailwindcss/cli": "^4.1.11",
+    "@tailwindcss/postcss": "^4.1.11",
+    "@tailwindcss/vite": "^4.1.11",
+    "astro": "^5.11.1",
+    "astro-capo": "^0.0.1",
+    "astro-compress": "^2.3.8",
+    "astro-expressive-code": "^0.41.3",
+    "astro-icon": "^1.1.5",
+    "astro-og-canvas": "^0.7.0",
+    "swiper": "^11.2.10",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@iconify-json/lucide": "^1.2.57",
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/netlify-identity-widget": "^1.9.6",
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
+    "prettier": "^3.6.2",
+    "prettier-plugin-astro": "^0.14.1",
+    "prettier-plugin-tailwindcss": "^0.6.14"
+  }
+}

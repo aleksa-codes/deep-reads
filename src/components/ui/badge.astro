@@ -1,0 +1,45 @@
+---
+import { cn } from '@/lib/utils';
+import { Icon } from 'astro-icon/components';
+
+type BadgeVariant = 'default' | 'secondary' | 'outline' | 'destructive';
+type BadgeSize = 'sm' | 'default' | 'lg';
+
+interface Props {
+  variant?: BadgeVariant;
+  size?: BadgeSize;
+  icon?: string;
+  class?: string;
+  as?: 'span' | 'a';
+  href?: string;
+  [key: string]: any;
+}
+
+const {
+  variant = 'default',
+  size = 'default',
+  icon,
+  as: Component = 'span',
+  class: className,
+  ...rest
+}: Props = Astro.props;
+
+const baseClassName = cn(
+  'inline-flex items-center gap-1.5 rounded-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+  // Sizes
+  size === 'sm' && 'px-2.5 py-0.5 text-xs',
+  size === 'default' && 'px-4 py-1.5 text-sm',
+  size === 'lg' && 'px-5 py-2 text-base',
+  // Variants
+  variant === 'default' && 'bg-primary text-primary-foreground hover:bg-primary/80',
+  variant === 'secondary' && 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+  variant === 'outline' && 'border border-input bg-background hover:bg-primary hover:text-primary-foreground',
+  variant === 'destructive' && 'bg-destructive text-destructive-foreground hover:bg-destructive/80',
+  className,
+);
+---
+
+<Component class={baseClassName} {...rest}>
+  {icon && <Icon name={icon} class='size-3.5' />}
+  <slot />
+</Component>

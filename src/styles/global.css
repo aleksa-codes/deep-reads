@@ -1,0 +1,210 @@
+@import 'tailwindcss';
+@plugin "@tailwindcss/typography";
+@variant dark (&:where(.dark, .dark *));
+@utility container {
+  margin-inline: auto;
+  padding-inline: 1rem;
+  max-width: 1400px;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --font-sans: 'Roboto Flex', sans-serif;
+  --breakpoint-xs: 475px;
+  --background-image-forest: url('/forest-bg.webp');
+
+  --animate-logo-cloud: marquee 30s linear infinite;
+  --animate-logo-cloud-sm: marquee-sm 30s linear infinite;
+  --animate-text-shine: text-shine 4s ease-in-out infinite;
+  --animate-snow: snowfall var(--duration, 5s) linear forwards;
+  --animate-bounce-in: bounce-in 0.5s ease-out;
+
+  @keyframes marquee-sm {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - 2rem));
+    }
+  }
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - 4rem));
+    }
+  }
+
+  @keyframes text-shine {
+    0% {
+      background-position: 100% center;
+    }
+    100% {
+      background-position: -100% center;
+    }
+  }
+
+  @keyframes snowfall {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(var(--end-x), 110vh);
+    }
+  }
+
+  @keyframes bounce-in {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer base {
+  @font-face {
+    font-family: 'Roboto Flex';
+    font-style: normal;
+    font-weight: 400 900;
+    font-stretch: 100%;
+    font-display: swap;
+    src: url('/fonts/roboto-flex.woff2') format('woff2');
+    unicode-range:
+      U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+      U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  :root {
+    --background: oklch(100% 0 106.37);
+    --foreground: oklch(26.56% 0.0346 169.81);
+    --card: oklch(100% 0 106.37);
+    --card-foreground: oklch(26.56% 0.0346 169.81);
+    --primary: oklch(46.61% 0.0891 165.49);
+    --primary-foreground: oklch(100% 0 106.37);
+    --secondary: oklch(55.26% 0.1124 48.97);
+    --secondary-foreground: oklch(100% 0 106.37);
+    --muted: oklch(97.22% 0.0047 174.45);
+    --muted-foreground: oklch(40.91% 0.0492 170.29);
+    --accent: oklch(59.05% 0.1182 164.58);
+    --accent-foreground: oklch(100% 0 106.37);
+    --destructive: oklch(53.56% 0.2041 27.72);
+    --destructive-foreground: oklch(100% 0 106.37);
+    --border: oklch(92.04% 0.0211 173.9);
+    --input: oklch(92.04% 0.0211 173.9);
+    --ring: oklch(46.61% 0.0891 165.49);
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: oklch(21.23% 0.0248 170.45);
+    --foreground: oklch(100% 0 106.37);
+    --card: oklch(23.93% 0.0298 170.08);
+    --card-foreground: oklch(100% 0 106.37);
+    --primary: oklch(59.05% 0.1182 164.58);
+    --primary-foreground: oklch(11.49% 0 0);
+    --secondary: oklch(68.27% 0.1425 48.93);
+    --secondary-foreground: oklch(11.49% 0 0);
+    --muted: oklch(29.42% 0.0325 170.75);
+    --muted-foreground: oklch(85.95% 0.0238 173.76);
+    --accent: oklch(59.05% 0.1182 164.58);
+    --accent-foreground: oklch(100% 0 106.37);
+    --destructive: oklch(53.56% 0.2041 27.72);
+    --destructive-foreground: oklch(100% 0 106.37);
+    --border: oklch(35.28% 0.0411 170.48);
+    --input: oklch(35.28% 0.0411 170.48);
+    --ring: oklch(59.05% 0.1182 164.58);
+  }
+}
+
+/* Captcha */
+/* .g-recaptcha div:first-child {
+  max-width: 220px;
+  margin: 0 auto;
+}
+
+.g-recaptcha iframe {
+  width: 220px !important;
+  border: 1px solid var(--input);
+  border-radius: calc(var(--radius) - 2px);
+} */
+
+/* Code block theme */
+/* Inline code block */
+@layer base {
+  code {
+    @apply rounded-sm bg-[#fafafa] px-1 py-0.5 font-mono text-sm;
+  }
+
+  html.dark code {
+    @apply bg-[#282c34];
+  }
+}
+
+/* Modified: https://github.com/tailwindlabs/tailwindcss/discussions/14031 */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground scroll-smooth;
+  }
+
+  ::selection {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  ::-webkit-scrollbar {
+    @apply h-2 w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary rounded-full;
+  }
+
+  input:-webkit-autofill,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px var(--background) inset !important;
+    box-shadow: 0 0 0 1000px var(--background) inset !important;
+    -webkit-text-fill-color: var(--foreground) !important;
+  }
+}

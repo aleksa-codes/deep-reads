@@ -1,0 +1,16 @@
+---
+import Layout from '@/layouts/layout.astro';
+import Top from '@/components/top.astro'; // updated import
+import { Content } from '@/pages/terms-of-use/_content.md';
+---
+
+<Layout title='Terms of Use' description='Forest Designs terms and conditions for using our services.'>
+  <Top title='Terms of Use' description='Our terms and conditions for using our services' />
+  <section class='bg-background py-16 sm:py-20'>
+    <div class='container'>
+      <div class='prose prose-blue dark:prose-invert mx-auto w-full max-w-none'>
+        <Content />
+      </div>
+    </div>
+  </section>
+</Layout>

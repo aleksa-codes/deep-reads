@@ -1,0 +1,152 @@
+---
+import { Image } from 'astro:assets';
+import { Icon } from 'astro-icon/components';
+import Button from '@/components/ui/button.astro';
+
+interface Props {
+  projects: Array<{
+    title: string;
+    description: string;
+    image: ImageMetadata;
+    link: string;
+  }>;
+}
+
+const { projects } = Astro.props;
+---
+
+<section class='bg-muted py-16 sm:py-20'>
+  <div class='container'>
+    <div class='mx-auto max-w-2xl text-center'>
+      <h2 class='text-foreground text-3xl font-bold tracking-tight sm:text-4xl'>Full Portfolio</h2>
+      <p class='text-muted-foreground mt-4 text-lg'>Click on any project to view details</p>
+    </div>
+
+    <div class='mt-16 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4'>
+      {
+        projects.map((project, index) => (
+          <div
+            class='group bg-muted relative cursor-zoom-in overflow-hidden rounded-xl'
+            data-gallery-item
+            data-index={index}
+          >
+            <div class='aspect-[3/4] sm:aspect-square'>
+              <Image
+                src={project.image}
+                alt={project.title}
+                format={'webp'}
+                quality={'max'}
+                class='h-full w-full object-cover transition duration-300 will-change-transform group-hover:scale-105'
+              />
+            </div>
+            <div class='absolute inset-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100'>
+              <div class='absolute right-4 bottom-4 left-4'>
+                <h3 class='text-lg font-medium text-white'>{project.title}</h3>
+                <p class='mt-2 line-clamp-2 text-sm text-gray-200'>{project.description}</p>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- Fullscreen Modal -->
+  <div
+    class='gallery-overlay invisible fixed inset-0 z-[9999] bg-black/90 opacity-0 backdrop-blur-sm transition-[opacity,visibility] duration-300 data-[state=visible]:visible data-[state=visible]:opacity-100'
+  >
+    <div class='relative h-full py-16 sm:py-20'>
+      <Button
+        variant='ghost'
+        size='icon'
+        class='gallery-close absolute top-4 right-4 z-50 !bg-black/20 text-white backdrop-blur-sm hover:!bg-black/40 sm:top-6 sm:right-6'
+        aria-label='Close gallery'
+      >
+        <Icon name='lucide:x' class='h-5 w-5' />
+      </Button>
+
+      <div class='gallery-fullscreen-swiper h-full'>
+        <div class='swiper-wrapper'>
+          {
+            projects.map((project) => (
+              <div class='swiper-slide flex h-full items-center justify-center'>
+                <div class='flex flex-col items-center gap-4 p-4 sm:p-8'>
+                  <div class='relative flex items-center justify-center'>
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      format={'webp'}
+                      quality={'max'}
+                      class='max-h-[75vh] w-auto object-contain'
+                    />
+                  </div>
+                  <div class='w-full max-w-3xl rounded-lg bg-black/50 p-4 text-center backdrop-blur-sm'>
+                    <h3 class='text-lg font-medium text-white sm:text-xl'>{project.title}</h3>
+                    <p class='mt-2 text-sm text-gray-200 sm:text-base'>{project.description}</p>
+                  </div>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+
+        <button
+          class='swiper-button-prev !absolute !top-1/2 !left-4 z-50 !m-0 !hidden !h-10 !w-10 !-translate-y-1/2 !rounded-full !bg-black/20 !text-lg !text-white backdrop-blur-sm transition-colors before:!hidden after:!text-lg hover:!bg-black/40 sm:!flex'
+          aria-label='Previous slide'></button>
+        <button
+          class='swiper-button-next !absolute !top-1/2 !right-4 z-50 !m-0 !hidden !h-10 !w-10 !-translate-y-1/2 !rounded-full !bg-black/20 !text-lg !text-white backdrop-blur-sm transition-colors before:!hidden after:!text-lg hover:!bg-black/40 sm:!flex'
+          aria-label='Next slide'></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import Swiper from 'swiper';
+  import { Navigation, Keyboard } from 'swiper/modules';
+  import 'swiper/css/bundle';
+
+  let fullscreenSwiper: Swiper | null = null;
+
+  function initFullscreenGallery() {
+    const overlay = document.querySelector('.gallery-overlay') as HTMLElement;
+    const closeBtn = document.querySelector('.gallery-close') as HTMLButtonElement;
+    const items = document.querySelectorAll('[data-gallery-item]');
+
+    if (!overlay || !closeBtn) return;
+
+    fullscreenSwiper = new Swiper('.gallery-fullscreen-swiper', {
+      modules: [Navigation, Keyboard],
+      keyboard: { enabled: true },
+      navigation: {
+        prevEl: '.swiper-button-prev',
+        nextEl: '.swiper-button-next',
+        hideOnClick: true,
+      },
+    });
+
+    const openGallery = (index: number) => {
+      overlay.dataset.state = 'visible';
+      document.body.style.overflow = 'hidden';
+      fullscreenSwiper?.slideTo(index, 0);
+    };
+
+    const closeGallery = () => {
+      overlay.dataset.state = 'hidden';
+      document.body.style.overflow = '';
+    };
+
+    items.forEach((item) => {
+      item.addEventListener('click', () => {
+        const index = parseInt(item.getAttribute('data-index') || '0', 10);
+        openGallery(index);
+      });
+    });
+
+    closeBtn.addEventListener('click', closeGallery);
+    document.addEventListener('keydown', (e) => e.key === 'Escape' && closeGallery());
+  }
+
+  document.addEventListener('astro:page-load', initFullscreenGallery);
+  document.addEventListener('DOMContentLoaded', initFullscreenGallery);
+</script>

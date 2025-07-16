@@ -1,0 +1,119 @@
+---
+import { Image } from 'astro:assets';
+import Button from '@/components/ui/button.astro';
+
+// Import the same images from gallery
+import ecoHarvestImg from '@/assets/portfolio/eco-harvest.jpg';
+import zenithFitnessImg from '@/assets/portfolio/zenith-fitness.jpg';
+import artisanCoffeeImg from '@/assets/portfolio/artisan-coffee.jpg';
+
+// Use existing portfolio images for the promo slider
+const promoImages = [
+  {
+    src: ecoHarvestImg,
+    alt: 'Modern Website Design Example',
+  },
+  {
+    src: zenithFitnessImg,
+    alt: 'Responsive Web Development',
+  },
+  {
+    src: artisanCoffeeImg,
+    alt: 'E-commerce Solutions',
+  },
+];
+
+interface Props {
+  imagePosition?: 'left' | 'right';
+}
+
+const { imagePosition = 'left' } = Astro.props;
+---
+
+<section class='bg-background py-8 sm:py-16'>
+  <div class='container'>
+    <div
+      class={`bg-muted relative flex flex-col overflow-hidden rounded-xl border md:grid md:grid-cols-2 ${
+        imagePosition === 'right' ? 'md:[&>div:first-child]:order-last' : ''
+      }`}
+    >
+      <!-- Slider Section -->
+      <div class='relative w-full'>
+        <div class='swiper promo-slider'>
+          <div class='swiper-wrapper'>
+            {
+              promoImages.map((image) => (
+                <div class='swiper-slide'>
+                  <div class='relative'>
+                    <div class='aspect-[16/9] md:aspect-[4/3]'>
+                      <Image
+                        src={image.src}
+                        alt={image.alt}
+                        format={'webp'}
+                        quality={'max'}
+                        class='h-full w-full object-cover'
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+          <div class='absolute bottom-4 left-1/2 z-10 -translate-x-1/2'>
+            <div
+              class='promo-pagination inline-flex items-center gap-1.5 rounded-full bg-black/20 px-3 py-1.5 backdrop-blur-sm [&>.swiper-pagination-bullet]:h-2 [&>.swiper-pagination-bullet]:w-2 [&>.swiper-pagination-bullet]:rounded-full [&>.swiper-pagination-bullet]:bg-white/50 [&>.swiper-pagination-bullet]:transition-colors [&>.swiper-pagination-bullet-active]:!bg-white'
+            >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Section -->
+      <div class='flex flex-1 flex-col justify-center p-6 sm:p-8 md:p-12'>
+        <p class='text-secondary text-sm font-medium sm:text-base'>Special Offer</p>
+        <h3 class='text-foreground mt-2 text-xl font-bold sm:mt-4 sm:text-2xl md:text-3xl'>
+          Transform Your Digital Presence
+        </h3>
+        <p class='text-muted-foreground mt-3 text-base sm:mt-4 sm:text-lg'>
+          Get a comprehensive website audit and personalized strategy session. Limited time offer for new clients.
+        </p>
+        <ul class='mt-4 space-y-2 sm:mt-6'>
+          {
+            ['SEO Analysis', 'Performance Review', 'UX Assessment', 'Security Check'].map((item) => (
+              <li class='text-muted-foreground flex items-center gap-2 text-sm sm:text-base'>
+                <svg class='text-primary h-4 w-4 sm:h-5 sm:w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                  <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 13l4 4L19 7' />
+                </svg>
+                {item}
+              </li>
+            ))
+          }
+        </ul>
+        <div class='mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:gap-4'>
+          <Button href='#contact' variant='default' class='w-full sm:w-auto'>Get Started</Button>
+          <Button href='/services' variant='outline' class='w-full sm:w-auto'>Learn More</Button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import Swiper from 'swiper';
+  import { Autoplay, Pagination } from 'swiper/modules';
+  import 'swiper/css/bundle';
+
+  new Swiper('.promo-slider', {
+    modules: [Autoplay, Pagination],
+    slidesPerView: 1,
+    loop: true,
+    autoplay: {
+      delay: 4000,
+      disableOnInteraction: false,
+    },
+    pagination: {
+      el: '.promo-pagination',
+      clickable: true,
+    },
+  });
+</script>
