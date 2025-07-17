@@ -5,6 +5,7 @@ import Badge from '@/components/ui/badge.astro';
 import Button from '@/components/ui/button.astro';
 import { Icon } from 'astro-icon/components';
 import { tagToSlug } from '@/lib/utils';
+import LikeButton from '@/components/like-button';
 
 export async function getStaticPaths() {
   const reads = await getCollection('reads');
@@ -65,6 +66,10 @@ const formatDate = (date: Date) => {
           <Icon name='lucide:external-link' class='mr-2 h-4 w-4' />
           Read Original
         </Button>
+
+        {/* The LikeButton is now simpler */}
+        <LikeButton client:load readId={read.id} />
+
         <Button href='#' variant='outline' size='lg'>
           <Icon name='lucide:share-2' class='mr-2 h-4 w-4' />
           Share

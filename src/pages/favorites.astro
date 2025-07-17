@@ -1,0 +1,57 @@
+---
+import Layout from '@/layouts/layout.astro';
+import { auth } from '@/lib/auth';
+import { db } from '@/lib/db';
+import { favorites } from '@/lib/schema';
+import { eq } from 'drizzle-orm';
+import { getCollection } from 'astro:content';
+
+export const prerender = false;
+
+// 1. Get session and protect the route
+const session = await auth.api.getSession({ headers: Astro.request.headers });
+if (!session?.user) {
+  return Astro.redirect('/'); // Redirect if not logged in
+}
+
+// 2. Fetch all of the user's favorite IDs from the DB
+const userFavorites = await db
+  .select({ readId: favorites.readId })
+  .from(favorites)
+  .where(eq(favorites.userId, session.user.id));
+const favoriteReadIds = new Set(userFavorites.map((fav) => fav.readId));
+
+// 3. Fetch all reads from the content collection and filter them
+const allReads = await getCollection('reads');
+const favoriteReads = allReads.filter((read) => favoriteReadIds.has(read.id));
+---
+
+<Layout title='My Favorites' description='A list of your saved articles.' hideCTA={true}>
+  <div class='container mx-auto max-w-4xl px-4 py-10'>
+    <div class='mb-8 border-b pb-8 text-center'>
+      <h1 class='text-foreground text-4xl font-extrabold tracking-tight'>My Favorites</h1>
+      <p class='text-muted-foreground mt-2 text-lg'>
+        You have saved {favoriteReads.length} article{favoriteReads.length !== 1 ? 's' : ''}.
+      </p>
+    </div>
+
+    <div class='space-y-8'>
+      {
+        favoriteReads.length > 0 ? (
+          favoriteReads.map((read) => (
+            <article>
+              <h2 class='text-foreground mb-2 text-2xl font-bold tracking-tight'>
+                <a href={`/read/${read.id}/`} class='hover:text-primary transition-colors'>
+                  {read.data.title}
+                </a>
+              </h2>
+              <p class='text-muted-foreground line-clamp-2 text-base leading-relaxed'>{read.data.summary}</p>
+            </article>
+          ))
+        ) : (
+          <p class='text-muted-foreground text-center'>You haven't favorited any articles yet.</p>
+        )
+      }
+    </div>
+  </div>
+</Layout>

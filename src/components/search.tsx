@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search as SearchIcon } from 'lucide-react';
 import Fuse from 'fuse.js';
 import type { FuseResult, IFuseOptions } from 'fuse.js';
@@ -16,6 +16,7 @@ export default function Search() {
   const [isLoading, setIsLoading] = useState(false);
 
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const fuseRef = useRef<Fuse<ReadItem> | null>(null);
 
   useEffect(() => {
@@ -56,10 +57,9 @@ export default function Search() {
   useEffect(() => {
     if (isOpen) {
       dialogRef.current?.showModal();
+      inputRef.current?.focus();
     } else {
-      setTimeout(() => {
-        dialogRef.current?.close();
-      }, 150);
+      setTimeout(() => dialogRef.current?.close(), 150);
     }
   }, [isOpen]);
 
@@ -70,28 +70,42 @@ export default function Search() {
         setIsOpen(true);
       }
       if (e.key === 'Escape') setIsOpen(false);
-      if (!isOpen || results.length === 0) return;
+
+      if (!isOpen) return;
+
+      // New 'Enter' key logic
+      if (e.key === 'Enter') {
+        e.preventDefault(); // Prevent any default form submission
+        if (activeIndex > -1) {
+          // If an item is selected, navigate to it
+          const result = results[activeIndex];
+          if (result) window.location.href = `/read/${result.item.id}/`;
+        } else if (query.length > 0) {
+          // If no item is selected, navigate to the search results page
+          window.location.href = `/search?q=${encodeURIComponent(query)}`;
+        }
+      }
+
+      if (results.length === 0) return;
+
+      // Arrow key navigation
       if (e.key === 'ArrowDown') {
         e.preventDefault();
         setActiveIndex((prev) => (prev + 1) % results.length);
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         setActiveIndex((prev) => (prev - 1 + results.length) % results.length);
-      } else if (e.key === 'Enter' && activeIndex > -1) {
-        e.preventDefault();
-        const result = results[activeIndex];
-        if (result) window.location.href = `/read/${result.item.id}/`;
       }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, results, activeIndex]);
+  }, [isOpen, results, activeIndex, query]); // <-- query is a dependency
 
   const highlight = useCallback(
     (text: string) => {
       if (!query) return text;
       const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
-      return text.replace(regex, `<mark class="bg-primary/20 rounded-sm px-0.5">$1</mark>`);
+      return text.replace(regex, `<mark class="bg-primary/80 rounded-sm px-0.5">$1</mark>`);
     },
     [query],
   );
@@ -112,18 +126,18 @@ export default function Search() {
         </kbd>
       </button>
 
-      {/* THE DEFINITIVE FIX IS IN THIS CLASSNAME */}
       <dialog
         ref={dialogRef}
         onClose={() => setIsOpen(false)}
         onClick={(e) => {
           if (e.target === dialogRef.current) setIsOpen(false);
         }}
-        className={`bg-popover text-popover-foreground /* THIS IS THE FIX: Explicitly set horizontal margin to auto */ mx-auto w-[95vw] rounded-lg border p-0 shadow-lg transition-all duration-200 ease-in-out sm:max-w-xl ${isOpen ? 'mt-[10vh] scale-100 opacity-100 sm:mt-[15vh]' : 'mt-[8vh] scale-95 opacity-0'} backdrop:bg-black/50 backdrop:transition-opacity backdrop:duration-200 ${isOpen ? 'backdrop:opacity-100' : 'backdrop:opacity-0'} `}
+        className={`bg-popover text-popover-foreground mx-auto w-[95vw] rounded-lg border p-0 shadow-lg transition-all duration-200 ease-in-out sm:max-w-xl ${isOpen ? 'mt-[10vh] scale-100 opacity-100 sm:mt-[15vh]' : 'mt-[8vh] scale-95 opacity-0'} backdrop:bg-black/50 backdrop:transition-opacity backdrop:duration-200 ${isOpen ? 'backdrop:opacity-100' : 'backdrop:opacity-0'}`}
       >
         <div className='flex items-center border-b px-3'>
           <SearchIcon className='mr-2 h-4 w-4 shrink-0 opacity-50' />
           <input
+            ref={inputRef}
             type='text'
             placeholder='Search for news, topics, or sources...'
             value={query}

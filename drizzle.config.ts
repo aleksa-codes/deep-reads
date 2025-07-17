@@ -4,7 +4,7 @@ import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
   out: './drizzle',
-  schema: './src/lib/auth-schema.ts',
+  schema: './src/lib/schema',
   dialect: 'sqlite',
   casing: 'snake_case',
   // ...(process.env.NODE_ENV === 'production'

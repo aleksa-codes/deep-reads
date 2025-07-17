@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { LogIn, LogOut, User as UserIcon } from 'lucide-react';
 // Import the simplified helpers from our new file
 import { useSession, signIn, signOut, type User } from '../lib/auth-client';
+import { Heart } from 'lucide-react'; // Add Heart icon
 
 // This DropdownMenu component remains a clean way to structure the UI
 const DropdownMenu = ({ user, onSignOut }: { user: User; onSignOut: () => void }) => (
@@ -12,6 +13,15 @@ const DropdownMenu = ({ user, onSignOut }: { user: User; onSignOut: () => void }
         <p className='text-muted-foreground truncate text-sm'>{user?.email}</p>
       </div>
       <div className='bg-border mx-1 h-px'></div>
+
+      {/* NEW LINK */}
+      <a
+        href='/favorites'
+        className='text-popover-foreground hover:bg-accent flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm'
+      >
+        <Heart className='h-4 w-4' />
+        <span>My Favorites</span>
+      </a>
       <button
         onClick={onSignOut}
         className='text-popover-foreground hover:bg-accent flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm'
