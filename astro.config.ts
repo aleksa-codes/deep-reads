@@ -53,5 +53,9 @@ export default defineConfig({
 
   adapter: netlify({
     imageCDN: false, // Set to true if you want to use Netlify's image CDN
+    devFeatures: {
+      images: false,
+      environmentVariables: false,
+    },
   }),
 });
