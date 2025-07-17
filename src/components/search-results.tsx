@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import Fuse from 'fuse.js';
 import { Search as SearchIcon } from 'lucide-react';
-import type { FuseResult, IFuseOptions } from 'fuse.js';
+import type { IFuseOptions } from 'fuse.js';
 import type { ReadItem } from '../pages/api/search.json';
 
 interface SearchResultsProps {

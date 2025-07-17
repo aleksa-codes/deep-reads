@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 import ThemeToggle from '@/components/theme-toggle.astro';
 import { Icon } from 'astro-icon/components';
 import Button from '@/components/ui/button.astro';
-import SnowToggle from '@/components/snow-toggle.astro';
 import { siteConfig } from '@/config/site.config';
 
 interface NavLink {
@@ -106,7 +105,6 @@ const isCurrentPage = (href: string) => {
     </div>
     <!-- Right section: Theme Toggle + CTA -->
     <div class='flex items-center gap-2'>
-      <SnowToggle />
       <ThemeToggle />
       <!-- Desktop CTA Button -->
       <Button href='/contact/' variant='default' class='hidden px-8 lg:inline-flex'>Get Started</Button>

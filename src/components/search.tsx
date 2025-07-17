@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Search as SearchIcon } from 'lucide-react';
 import Fuse from 'fuse.js';
 import type { FuseResult, IFuseOptions } from 'fuse.js';

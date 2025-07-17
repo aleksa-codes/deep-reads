@@ -1,5 +1,4 @@
 ---
-import CTA from '@/components/sections/CTA.astro';
 import Footer from '@/components/footer.astro';
 import BaseHead from '@/components/base-head.astro';
 import TailwindIndicator from '@/components/tailwind-indicator.astro';
@@ -28,7 +27,6 @@ interface Props {
   nofollow?: boolean;
   twitterCreator?: string;
   twitterSite?: string;
-  hideCTA?: boolean;
   schema?: {
     type: string;
     date?: Date;
@@ -37,8 +35,7 @@ interface Props {
   };
 }
 
-const { title, description, image, ogType, schema, noindex, nofollow, twitterCreator, twitterSite, hideCTA } =
-  Astro.props;
+const { title, description, image, ogType, schema, noindex, nofollow, twitterCreator, twitterSite } = Astro.props;
 ---
 
 <!doctype html>
@@ -112,7 +109,6 @@ const { title, description, image, ogType, schema, noindex, nofollow, twitterCre
     <main class='container mx-auto px-4 py-8'>
       <slot />
     </main>
-    {!hideCTA && <CTA />}
     <Footer />
     <TailwindIndicator />
   </body>

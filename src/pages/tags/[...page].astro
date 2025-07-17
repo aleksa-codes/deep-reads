@@ -33,7 +33,7 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { page, totalReads, allTagsCount } = Astro.props;
 ---
 
-<Layout title='Browse Tags - DeepReads' description='Explore all topics and tags on DeepReads' hideCTA={true}>
+<Layout title='Browse Tags - DeepReads' description='Explore all topics and tags on DeepReads'>
   <div class='container mx-auto px-4 py-10'>
     <div class='mb-8 text-center'>
       <h2 class='text-foreground text-3xl font-bold tracking-tight sm:text-4xl'>Explore Topics</h2>

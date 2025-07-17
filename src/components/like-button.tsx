@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { useSession, signIn } from '../lib/auth-client';
 

@@ -60,60 +60,6 @@
   --shadow-2xl: var(--shadow-2xl);
 
   --breakpoint-xs: 475px;
-  --background-image-forest: url('/forest-bg.webp');
-
-  --animate-logo-cloud: marquee 30s linear infinite;
-  --animate-logo-cloud-sm: marquee-sm 30s linear infinite;
-  --animate-text-shine: text-shine 4s ease-in-out infinite;
-  --animate-snow: snowfall var(--duration, 5s) linear forwards;
-  --animate-bounce-in: bounce-in 0.5s ease-out;
-
-  @keyframes marquee-sm {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(calc(-100% - 2rem));
-    }
-  }
-
-  @keyframes marquee {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(calc(-100% - 4rem));
-    }
-  }
-
-  @keyframes text-shine {
-    0% {
-      background-position: 100% center;
-    }
-    100% {
-      background-position: -100% center;
-    }
-  }
-
-  @keyframes snowfall {
-    0% {
-      transform: translate(0, 0);
-    }
-    100% {
-      transform: translate(var(--end-x), 110vh);
-    }
-  }
-
-  @keyframes bounce-in {
-    0% {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 }
 
 @layer base {
@@ -237,18 +183,6 @@
   border: 1px solid var(--input);
   border-radius: calc(var(--radius) - 2px);
 } */
-
-/* Code block theme */
-/* Inline code block */
-@layer base {
-  code {
-    @apply rounded-sm bg-[#fafafa] px-1 py-0.5 font-mono text-sm;
-  }
-
-  html.dark code {
-    @apply bg-[#282c34];
-  }
-}
 
 /* Modified: https://github.com/tailwindlabs/tailwindcss/discussions/14031 */
 @layer base {
