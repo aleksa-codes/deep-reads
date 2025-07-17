@@ -30,7 +30,7 @@ collections:
     create: true
     slug: '{{slug}}'
     fields:
-      - { label: 'Tag Name', name: 'title', widget: 'string' }
+      - { label: 'Tag Name', name: 'title', widget: 'string', required: true } # <-- Added required
 
   # 2. UPDATE THE READS COLLECTION
   - name: 'reads'
@@ -45,20 +45,22 @@ collections:
           label: 'Title',
           name: 'title',
           widget: 'string',
+          required: true, # <-- Added required
           pattern: ['.{10,150}', 'Must be between 10 and 150 characters'],
         }
       - {
           label: 'URL',
           name: 'url',
           widget: 'string',
+          required: true, # <-- Added required
           pattern: ['^https?://.+', 'Must be a valid URL starting with http:// or https://'],
         }
       - {
           label: 'Summary',
           name: 'summary',
           widget: 'text',
-          required: false,
-          pattern: ['.{0,300}', 'Must be 300 characters or less'],
+          required: true, # <-- Changed to required
+          pattern: ['.{50,300}', 'Must be between 50 and 300 characters'], # <-- Adjusted pattern for required field
         }
       # THIS IS THE KEY CHANGE
       - label: 'Tags'
@@ -69,11 +71,13 @@ collections:
         value_field: '{{slug}}' # The value to store in the post's frontmatter (the tag's slug)
         display_fields: ['title'] # The field to display in the dropdown
         multiple: true # Allow selecting multiple tags
-        required: false
+        required: true
+        min: 1 # <-- Enforce at least one tag is selected
       - {
           label: 'Date Added',
           name: 'dateAdded',
           widget: 'datetime',
-          format: 'YYYY-DD-MM', # Corrected format
-          default: '',
+          format: 'YYYY-MM-DD',
+          required: true, # <-- Added required
+          # default: '' # <-- Removed default to ensure user interaction
         }
