@@ -1,5 +1,5 @@
 backend:
-  name: git-gateway # or test-repo
+  name: git-gateway
   # name: test-repo
   branch: main
   squash_merges: true
@@ -23,6 +23,16 @@ display_url: https://deepreads.netlify.app
 
 # Collections
 collections:
+  # 1. ADD THE NEW TAGS COLLECTION
+  - name: 'tags'
+    label: 'Tags'
+    folder: 'src/content/tags'
+    create: true
+    slug: '{{slug}}'
+    fields:
+      - { label: 'Tag Name', name: 'title', widget: 'string' }
+
+  # 2. UPDATE THE READS COLLECTION
   - name: 'reads'
     label: 'Reads'
     folder: 'src/content/reads'
@@ -36,14 +46,12 @@ collections:
           name: 'title',
           widget: 'string',
           pattern: ['.{10,150}', 'Must be between 10 and 150 characters'],
-          hint: 'The title of the article or read',
         }
       - {
           label: 'URL',
           name: 'url',
           widget: 'string',
           pattern: ['^https?://.+', 'Must be a valid URL starting with http:// or https://'],
-          hint: 'The external URL to the article',
         }
       - {
           label: 'Summary',
@@ -51,22 +59,21 @@ collections:
           widget: 'text',
           required: false,
           pattern: ['.{0,300}', 'Must be 300 characters or less'],
-          hint: 'Optional brief summary of the article',
         }
-      - {
-          label: 'Tags',
-          name: 'tags',
-          widget: 'list',
-          allow_add: true,
-          default: [],
-          hint: 'Add custom tags for categorization (press Enter to add each tag)',
-          required: false,
-        }
+      # THIS IS THE KEY CHANGE
+      - label: 'Tags'
+        name: 'tags'
+        widget: 'relation'
+        collection: 'tags' # The collection to relate to
+        search_fields: ['title'] # Field to search in the tags collection
+        value_field: '{{slug}}' # The value to store in the post's frontmatter (the tag's slug)
+        display_fields: ['title'] # The field to display in the dropdown
+        multiple: true # Allow selecting multiple tags
+        required: false
       - {
           label: 'Date Added',
           name: 'dateAdded',
           widget: 'datetime',
-          format: 'YYYY-MM-DD',
+          format: 'YYYY-DD-MM', # Corrected format
           default: '',
-          hint: 'When this read was added to the collection',
         }

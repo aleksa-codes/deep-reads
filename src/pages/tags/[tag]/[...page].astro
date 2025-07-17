@@ -1,37 +1,39 @@
 ---
 import { getCollection } from 'astro:content';
-import { tagToSlug } from '@/lib/utils';
 import Layout from '@/layouts/layout.astro';
 import Badge from '@/components/ui/badge.astro';
 import Pagination from '@/components/ui/pagination.astro';
 import { Icon } from 'astro-icon/components';
-import type { InferGetStaticPropsType, GetStaticPaths } from 'astro';
+import type { GetStaticPaths } from 'astro';
 
 export const getStaticPaths = (async ({ paginate }) => {
   const allReads = await getCollection('reads');
-  const allTags = [...new Set(allReads.flatMap((read) => read.data.tags || []))];
+  const allTags = await getCollection('tags');
+
+  // Create a mapping of slug to title for easy lookup later
+  const tagMap = new Map(allTags.map((t) => [t.id, t.data.title]));
 
   return allTags.flatMap((tag) => {
-    const filteredReads = allReads.filter((read) => read.data.tags?.includes(tag));
+    // Filter reads where the `tags` array includes the current tag's slug
+    const filteredReads = allReads.filter((read) => read.data.tags?.includes(tag.id));
+
+    if (filteredReads.length === 0) return []; // Don't generate pages for tags with no posts
+
     const sortedReads = filteredReads.sort((a, b) => b.data.dateAdded.valueOf() - a.data.dateAdded.valueOf());
 
     return paginate(sortedReads, {
-      params: { tag: tagToSlug(tag) },
+      params: { tag: tag.id }, // Use the tag's slug for the URL
       pageSize: 5,
       props: {
-        tag: tag,
-        allTags: allTags,
+        tagTitle: tag.data.title, // Pass the display title
+        allTags: Array.from(tagMap.entries()).map(([slug, title]) => ({ slug, title })),
       },
     });
   });
 }) satisfies GetStaticPaths;
 
-// type Params = InferGetStaticParamsType<typeof getStaticPaths>;
-type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+const { page, tagTitle, allTags } = Astro.props;
 
-const { page, tag, allTags } = Astro.props as Props;
-
-// Format date for display
 const formatDate = (date: Date) => {
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
@@ -41,18 +43,16 @@ const formatDate = (date: Date) => {
 };
 ---
 
-<Layout title={`Posts tagged with "${tag}"`} description={`Browse all articles about ${tag}`} hideCTA={true}>
+<Layout title={`Posts tagged with "${tagTitle}"`} description={`Browse all articles about ${tagTitle}`} hideCTA={true}>
   <div class='container mx-auto max-w-4xl px-4 py-10'>
-    <!-- Page Header -->
     <div class='mb-8 border-b pb-8 text-center'>
       <p class='text-muted-foreground text-sm font-semibold tracking-wider uppercase'>Topic</p>
-      <h1 class='text-foreground mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl'>{tag}</h1>
+      <h1 class='text-foreground mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl'>{tagTitle}</h1>
       <p class='text-muted-foreground mt-4 text-lg'>
         A collection of {page.total} article{page.total !== 1 ? 's' : ''} on this topic.
       </p>
     </div>
 
-    <!-- Articles Feed -->
     <div class='space-y-8'>
       {
         page.data.map((read) => (
@@ -60,29 +60,29 @@ const formatDate = (date: Date) => {
             <div class='text-muted-foreground mb-3 flex items-center gap-4 text-sm'>
               <time datetime={read.data.dateAdded.toISOString()}>{formatDate(read.data.dateAdded)}</time>
               <div class='flex flex-wrap gap-1'>
-                {read.data.tags.slice(0, 3).map((articleTag) => (
-                  <Badge
-                    as='a'
-                    href={`/tags/${tagToSlug(articleTag)}/`}
-                    variant={articleTag === tag ? 'default' : 'secondary'}
-                    class='font-normal'
-                  >
-                    {articleTag}
-                  </Badge>
-                ))}
+                {read.data.tags.slice(0, 3).map((tagSlug) => {
+                  const tag = allTags.find((t) => t.slug === tagSlug);
+                  if (!tag) return null;
+                  return (
+                    <Badge
+                      as='a'
+                      href={`/tags/${tag.slug}/`}
+                      variant={tag.slug === Astro.params.tag ? 'default' : 'secondary'}
+                    >
+                      {tag.title}
+                    </Badge>
+                  );
+                })}
               </div>
             </div>
-
             <h2 class='text-foreground mb-3 text-2xl font-bold tracking-tight'>
               <a href={`/read/${read.id}/`} class='hover:text-primary transition-colors'>
                 {read.data.title}
               </a>
             </h2>
-
             {read.data.summary && (
               <p class='text-muted-foreground mb-4 line-clamp-3 text-base leading-relaxed'>{read.data.summary}</p>
             )}
-
             <a
               href={`/read/${read.id}/`}
               class='text-primary inline-flex items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-80'
@@ -95,7 +95,6 @@ const formatDate = (date: Date) => {
       }
     </div>
 
-    <!-- Pagination -->
     {
       page.lastPage > 1 && (
         <div class='mt-12'>
@@ -104,18 +103,17 @@ const formatDate = (date: Date) => {
       )
     }
 
-    <!-- Explore Other Tags -->
     {
       allTags.length > 1 && (
         <div class='mt-16 border-t pt-10'>
           <h3 class='text-foreground mb-4 text-lg font-semibold'>Explore Other Topics</h3>
           <div class='flex flex-wrap gap-2'>
             {allTags
-              .filter((t) => t !== tag)
-              .slice(0, 15) // Show a max of 15 other tags to keep it clean
+              .filter((t) => t.slug !== Astro.params.tag)
+              .slice(0, 15)
               .map((otherTag) => (
-                <Badge as='a' href={`/tags/${tagToSlug(otherTag)}/`} variant='outline'>
-                  {otherTag}
+                <Badge as='a' href={`/tags/${otherTag.slug}/`} variant='outline'>
+                  {otherTag.title}
                 </Badge>
               ))}
           </div>

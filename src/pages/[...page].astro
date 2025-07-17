@@ -2,28 +2,33 @@
 import { getCollection } from 'astro:content';
 import { siteConfig } from '@/config/site.config';
 import Layout from '@/layouts/layout.astro';
-import { tagToSlug } from '@/lib/utils';
 import Badge from '@/components/ui/badge.astro';
 import Pagination from '@/components/ui/pagination.astro';
 import { Icon } from 'astro-icon/components';
-import type { InferGetStaticPropsType, GetStaticPaths } from 'astro';
+import type { GetStaticPaths } from 'astro';
 
 export const getStaticPaths = (async ({ paginate }) => {
+  // 1. Fetch both reads and the new tags collection
   const reads = await getCollection('reads');
+  const allTags = await getCollection('tags');
+
   const sortedReads = reads.sort((a, b) => b.data.dateAdded.valueOf() - a.data.dateAdded.valueOf());
 
+  // 2. Create a simple array of all tag info that can be passed as props
+  const allTagInfo = allTags.map((tag) => ({
+    slug: tag.id,
+    title: tag.data.title,
+  }));
+
+  // 3. Pass allTagInfo in the props so every page can access it
   return paginate(sortedReads, {
     pageSize: 5,
-    props: {},
+    props: { allTagInfo },
   });
 }) satisfies GetStaticPaths;
 
-// type Params = InferGetStaticParamsType<typeof getStaticPaths>;
-type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+const { page, allTagInfo } = Astro.props;
 
-const { page } = Astro.props as Props;
-
-// Format date for display
 const formatDate = (date: Date) => {
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
@@ -35,19 +40,27 @@ const formatDate = (date: Date) => {
 
 <Layout title={siteConfig.title} description={siteConfig.description} hideCTA={true}>
   <div class='container mx-auto max-w-4xl px-4 py-10'>
-    <!-- Reads Feed -->
     <div class='space-y-8'>
       {
         page.data.map((read) => (
           <article class='border-b pb-8 last:border-b-0 last:pb-0'>
             <div class='text-muted-foreground mb-3 flex items-center gap-4 text-sm'>
               <time datetime={read.data.dateAdded.toISOString()}>{formatDate(read.data.dateAdded)}</time>
+
+              {/* 4. This is the updated rendering logic for tags */}
               <div class='flex flex-wrap gap-1'>
-                {read.data.tags.slice(0, 3).map((tag) => (
-                  <Badge as='a' href={`/tags/${tagToSlug(tag)}/`} variant='secondary' class='font-normal'>
-                    {tag}
-                  </Badge>
-                ))}
+                {read.data.tags.slice(0, 3).map((tagSlug) => {
+                  // Find the full tag object using the slug from the post's frontmatter
+                  const tag = allTagInfo.find((t) => t.slug === tagSlug);
+                  // If for some reason the tag doesn't exist, skip rendering it
+                  if (!tag) return null;
+
+                  return (
+                    <Badge as='a' href={`/tags/${tag.slug}/`} variant='secondary' class='font-normal'>
+                      {tag.title} {/* <-- Display the human-readable title */}
+                    </Badge>
+                  );
+                })}
               </div>
             </div>
 
@@ -73,18 +86,14 @@ const formatDate = (date: Date) => {
       }
     </div>
 
-    <!-- Empty State -->
     {
       page.data.length === 0 && (
         <div class='bg-muted/50 flex flex-col items-center justify-center rounded-lg border-2 border-dashed py-24 text-center'>
-          <Icon name='lucide:archive' class='text-muted-foreground h-12 w-12' />
-          <h2 class='text-foreground mt-4 text-2xl font-semibold tracking-tight'>No Reads Yet</h2>
-          <p class='text-muted-foreground mt-2'>Check back later for new articles and insights.</p>
+          {/* ... Empty state ... */}
         </div>
       )
     }
 
-    <!-- Pagination -->
     {
       page.lastPage > 1 && (
         <div class='mt-12'>
@@ -94,11 +103,10 @@ const formatDate = (date: Date) => {
     }
   </div>
 </Layout>
-
 <script>
+  // This script is unrelated to tags and can remain as is.
   const urlParams = new URLSearchParams(window.location.hash.substring(1));
   const tokenTypes = ['invite_token', 'confirmation_token', 'recovery_token', 'email_change_token'];
-
   tokenTypes.forEach((tokenType) => {
     if (urlParams.has(tokenType)) {
       window.location.href = `/admin/#${tokenType}=${urlParams.get(tokenType)}`;

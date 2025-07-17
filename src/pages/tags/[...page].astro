@@ -1,43 +1,40 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '@/layouts/layout.astro';
-import { tagToSlug } from '@/lib/utils';
 import Badge from '@/components/ui/badge.astro';
-import Button from '@/components/ui/button.astro';
-import Pagination from '@/components/ui/pagination.astro';
 import { Icon } from 'astro-icon/components';
-import type { InferGetStaticPropsType, GetStaticPaths } from 'astro';
+import Pagination from '@/components/ui/pagination.astro';
+import type { GetStaticPaths } from 'astro';
 
 export const getStaticPaths = (async ({ paginate }) => {
-  const reads = await getCollection('reads');
-  const allTags = [...new Set(reads.flatMap((read) => read.data.tags || []))].sort();
+  const allReads = await getCollection('reads');
+  const allTags = await getCollection('tags');
 
-  const tagCounts = allTags.map((tag) => ({
-    tag,
-    count: reads.filter((read) => read.data.tags.includes(tag)).length,
-    recentReads: reads
-      .filter((read) => read.data.tags.includes(tag))
-      .sort((a, b) => b.data.dateAdded.valueOf() - a.data.dateAdded.valueOf())
-      .slice(0, 3),
-  }));
+  // Map over the definitive list of tags from the 'tags' collection
+  const tagData = allTags.map((tag) => {
+    // For each tag, find how many reads reference its slug
+    const relatedReads = allReads.filter((read) => read.data.tags.includes(tag.id));
+    return {
+      title: tag.data.title, // The display name, e.g., "Artificial Intelligence"
+      slug: tag.id, // The URL-friendly slug, e.g., "artificial-intelligence"
+      count: relatedReads.length,
+      recentReads: relatedReads.sort((a, b) => b.data.dateAdded.valueOf() - a.data.dateAdded.valueOf()).slice(0, 3),
+    };
+  });
 
-  const sortedTags = tagCounts.sort((a, b) => b.count - a.count);
+  const sortedTags = tagData.sort((a, b) => b.count - a.count);
 
   return paginate(sortedTags, {
     pageSize: 9,
-    props: { totalReads: reads.length, allTagsCount: allTags.length },
+    props: { totalReads: allReads.length, allTagsCount: allTags.length },
   });
 }) satisfies GetStaticPaths;
 
-// type Params = InferGetStaticParamsType<typeof getStaticPaths>;
-type Props = InferGetStaticPropsType<typeof getStaticPaths>;
-
-const { page, totalReads, allTagsCount } = Astro.props as Props;
+const { page, totalReads, allTagsCount } = Astro.props;
 ---
 
 <Layout title='Browse Tags - DeepReads' description='Explore all topics and tags on DeepReads' hideCTA={true}>
   <div class='container mx-auto px-4 py-10'>
-    <!-- Page Header -->
     <div class='mb-8 text-center'>
       <h2 class='text-foreground text-3xl font-bold tracking-tight sm:text-4xl'>Explore Topics</h2>
       <p class='text-muted-foreground mt-2 text-lg'>
@@ -46,7 +43,6 @@ const { page, totalReads, allTagsCount } = Astro.props as Props;
     </div>
 
     <div class='mx-auto max-w-7xl'>
-      <!-- Stats Section -->
       <div class='mb-12 grid grid-cols-1 gap-6 text-center md:grid-cols-3'>
         <div class='bg-card rounded-xl border p-6 shadow-sm'>
           <h3 class='text-muted-foreground text-sm font-medium uppercase'>Total Tags</h3>
@@ -62,17 +58,16 @@ const { page, totalReads, allTagsCount } = Astro.props as Props;
         </div>
       </div>
 
-      <!-- Tags Grid -->
       <div class='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
         {
-          page.data.map(({ tag, count, recentReads }) => (
+          page.data.map(({ title, slug, count, recentReads }) => (
             <a
-              href={`/tags/${tagToSlug(tag)}/`}
+              href={`/tags/${slug}/`}
               class='group bg-card hover:border-primary flex flex-col justify-between rounded-xl border p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg'
             >
               <div>
                 <div class='mb-4 flex items-start justify-between gap-4'>
-                  <h3 class='text-foreground group-hover:text-primary text-xl font-semibold'>{tag}</h3>
+                  <h3 class='text-foreground group-hover:text-primary text-xl font-semibold'>{title}</h3>
                   <Badge variant='secondary'>{count} posts</Badge>
                 </div>
                 <div class='border-t pt-4'>
@@ -93,22 +88,6 @@ const { page, totalReads, allTagsCount } = Astro.props as Props;
         }
       </div>
 
-      <!-- Empty State -->
-      {
-        page.data.length === 0 && (
-          <div class='bg-muted/50 mt-16 flex flex-col items-center justify-center rounded-lg border-2 border-dashed py-24 text-center'>
-            <Icon name='lucide:tag' class='text-muted-foreground h-12 w-12' />
-            <h2 class='text-foreground mt-4 text-2xl font-semibold tracking-tight'>No Tags Found</h2>
-            <p class='text-muted-foreground mt-2'>It looks like there are no tags to display right now.</p>
-            <Button href='/' variant='default' class='mt-6'>
-              <Icon name='lucide:arrow-left' class='mr-2 h-4 w-4' />
-              Go Back to Reads
-            </Button>
-          </div>
-        )
-      }
-
-      <!-- Pagination -->
       {
         page.lastPage > 1 && (
           <div class='mt-12'>
