@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '@/layouts/layout.astro';
-import Badge from '@/components/ui/badge.astro';
 import Pagination from '@/components/ui/pagination.astro';
 import { Icon } from 'astro-icon/components';
 import type { GetStaticPaths } from 'astro';
@@ -9,23 +8,18 @@ import type { GetStaticPaths } from 'astro';
 export const getStaticPaths = (async ({ paginate }) => {
   const allReads = await getCollection('reads');
   const allTags = await getCollection('tags');
-
-  // Create a mapping of slug to title for easy lookup later
   const tagMap = new Map(allTags.map((t) => [t.id, t.data.title]));
 
   return allTags.flatMap((tag) => {
-    // Filter reads where the `tags` array includes the current tag's slug
     const filteredReads = allReads.filter((read) => read.data.tags?.includes(tag.id));
-
-    if (filteredReads.length === 0) return []; // Don't generate pages for tags with no posts
-
+    if (filteredReads.length === 0) return [];
     const sortedReads = filteredReads.sort((a, b) => b.data.dateAdded.valueOf() - a.data.dateAdded.valueOf());
 
     return paginate(sortedReads, {
-      params: { tag: tag.id }, // Use the tag's slug for the URL
-      pageSize: 5,
+      params: { tag: tag.id },
+      pageSize: 7, // Matched with your preferred index page
       props: {
-        tagTitle: tag.data.title, // Pass the display title
+        tagTitle: tag.data.title,
         allTags: Array.from(tagMap.entries()).map(([slug, title]) => ({ slug, title })),
       },
     });
@@ -34,91 +28,112 @@ export const getStaticPaths = (async ({ paginate }) => {
 
 const { page, tagTitle, allTags } = Astro.props;
 
+// Use a shorter, cleaner date format consistent with the preferred layout
 const formatDate = (date: Date) => {
   return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric',
+    year: 'numeric',
   });
 };
+
+const currentTagSlug = Astro.params.tag;
 ---
 
-<Layout title={`Posts tagged with "${tagTitle}"`} description={`Browse all articles about ${tagTitle}`}>
-  <div class='container mx-auto max-w-4xl px-4 py-10'>
-    <div class='mb-8 border-b pb-8 text-center'>
-      <p class='text-muted-foreground text-sm font-semibold tracking-wider uppercase'>Topic</p>
-      <h1 class='text-foreground mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl'>{tagTitle}</h1>
-      <p class='text-muted-foreground mt-4 text-lg'>
-        A collection of {page.total} article{page.total !== 1 ? 's' : ''} on this topic.
-      </p>
-    </div>
+<Layout title={`Articles tagged with "${tagTitle}"`} description={`Browse all articles about ${tagTitle}`}>
+  <!-- PAGE HEADER: Clean, centered, and uses serif font for the title. -->
+  <header class='border-border mb-12 border-b pb-8 text-center'>
+    <h1 class='text-foreground font-serif text-4xl font-bold tracking-tight sm:text-5xl'>{tagTitle}</h1>
+    <p class='text-muted-foreground mt-4 text-lg'>
+      A collection of {page.total} article{page.total !== 1 ? 's' : ''} on this topic.
+    </p>
+  </header>
 
-    <div class='space-y-8'>
-      {
-        page.data.map((read) => (
-          <article>
-            <div class='text-muted-foreground mb-3 flex items-center gap-4 text-sm'>
+  <!-- ARTICLE LIST: Uses the user-preferred two-column layout for consistency. -->
+  <div class='divide-border divide-y'>
+    {
+      page.data.map((read) => (
+        <article class='py-10 md:py-12'>
+          <div class='grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-4'>
+            <aside class='text-muted-foreground col-span-1 text-sm md:text-right'>
               <time datetime={read.data.dateAdded.toISOString()}>{formatDate(read.data.dateAdded)}</time>
-              <div class='flex flex-wrap gap-1'>
+              <div class='mt-2 flex flex-wrap gap-x-2 gap-y-1 md:justify-end'>
                 {read.data.tags.slice(0, 3).map((tagSlug) => {
                   const tag = allTags.find((t) => t.slug === tagSlug);
                   if (!tag) return null;
+                  // Highlight the current tag
+                  const isCurrentTag = tag.slug === currentTagSlug;
                   return (
-                    <Badge
-                      as='a'
+                    <a
                       href={`/tags/${tag.slug}/`}
-                      variant={tag.slug === Astro.params.tag ? 'default' : 'secondary'}
+                      class:list={[
+                        'relative transition-colors',
+                        isCurrentTag ? 'text-primary font-semibold' : 'hover:text-primary',
+                      ]}
                     >
                       {tag.title}
-                    </Badge>
+                    </a>
                   );
                 })}
               </div>
-            </div>
-            <h2 class='text-foreground mb-3 text-2xl font-bold tracking-tight'>
-              <a href={`/read/${read.id}/`} class='hover:text-primary transition-colors'>
-                {read.data.title}
+            </aside>
+
+            <div class='col-span-1 md:col-span-3'>
+              <h2 class='text-foreground text-2xl leading-snug font-bold tracking-tight sm:text-3xl'>
+                <a
+                  href={`/read/${read.id}/`}
+                  class='from-primary to-primary bg-gradient-to-r bg-[length:0%_2px] bg-left-bottom bg-no-repeat transition-all duration-200 hover:bg-[length:100%_2px]'
+                >
+                  {read.data.title}
+                </a>
+              </h2>
+
+              {read.data.summary && (
+                <p class='text-muted-foreground mt-3 line-clamp-3 text-base leading-relaxed'>{read.data.summary}</p>
+              )}
+
+              <a
+                href={`/read/${read.id}/`}
+                class='group text-primary mt-4 inline-flex items-center text-sm font-medium'
+              >
+                <span>Read full story</span>
+                <Icon name='lucide:arrow-right' class='ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-1' />
               </a>
-            </h2>
-            {read.data.summary && (
-              <p class='text-muted-foreground mb-4 line-clamp-3 text-base leading-relaxed'>{read.data.summary}</p>
-            )}
-            <a
-              href={`/read/${read.id}/`}
-              class='text-primary inline-flex items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-80'
-            >
-              Read more
-              <Icon name='lucide:arrow-right' class='h-4 w-4' />
-            </a>
-          </article>
-        ))
-      }
-    </div>
-
-    {
-      page.lastPage > 1 && (
-        <div class='mt-12'>
-          <Pagination {page} />
-        </div>
-      )
-    }
-
-    {
-      allTags.length > 1 && (
-        <div class='mt-16 border-t pt-10'>
-          <h3 class='text-foreground mb-4 text-lg font-semibold'>Explore Other Topics</h3>
-          <div class='flex flex-wrap gap-2'>
-            {allTags
-              .filter((t) => t.slug !== Astro.params.tag)
-              .slice(0, 15)
-              .map((otherTag) => (
-                <Badge as='a' href={`/tags/${otherTag.slug}/`} variant='outline'>
-                  {otherTag.title}
-                </Badge>
-              ))}
+            </div>
           </div>
-        </div>
-      )
+        </article>
+      ))
     }
   </div>
+
+  <!-- PAGINATION -->
+  {
+    page.lastPage > 1 && (
+      <div class='mt-12'>
+        <Pagination {page} />
+      </div>
+    )
+  }
+
+  <!-- EXPLORE OTHER TOPICS: A cleaner, lighter design using simple links instead of heavy badges. -->
+  {
+    allTags.length > 1 && (
+      <div class='border-border mt-16 border-t pt-12'>
+        <h3 class='text-foreground mb-4 text-center text-lg font-semibold'>Explore Other Topics</h3>
+        <div class='flex flex-wrap justify-center gap-2'>
+          {allTags
+            .filter((t) => t.slug !== currentTagSlug)
+            .slice(0, 15)
+            .map((otherTag) => (
+              <a
+                href={`/tags/${otherTag.slug}/`}
+                class='bg-muted text-secondary-foreground hover:bg-accent hover:text-accent-foreground inline-block rounded-full px-4 py-1.5 text-sm transition-colors'
+              >
+                {otherTag.title}
+              </a>
+            ))}
+        </div>
+      </div>
+    )
+  }
 </Layout>

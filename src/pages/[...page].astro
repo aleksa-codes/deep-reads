@@ -2,27 +2,20 @@
 import { getCollection } from 'astro:content';
 import { siteConfig } from '@/config/site.config';
 import Layout from '@/layouts/layout.astro';
-import Badge from '@/components/ui/badge.astro';
 import Pagination from '@/components/ui/pagination.astro';
 import { Icon } from 'astro-icon/components';
 import type { GetStaticPaths } from 'astro';
 
 export const getStaticPaths = (async ({ paginate }) => {
-  // 1. Fetch both reads and the new tags collection
   const reads = await getCollection('reads');
   const allTags = await getCollection('tags');
-
   const sortedReads = reads.sort((a, b) => b.data.dateAdded.valueOf() - a.data.dateAdded.valueOf());
-
-  // 2. Create a simple array of all tag info that can be passed as props
   const allTagInfo = allTags.map((tag) => ({
     slug: tag.id,
     title: tag.data.title,
   }));
-
-  // 3. Pass allTagInfo in the props so every page can access it
   return paginate(sortedReads, {
-    pageSize: 5,
+    pageSize: 7,
     props: { allTagInfo },
   });
 }) satisfies GetStaticPaths;
@@ -31,80 +24,82 @@ const { page, allTagInfo } = Astro.props;
 
 const formatDate = (date: Date) => {
   return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric',
+    year: 'numeric',
   });
 };
 ---
 
 <Layout title={siteConfig.title} description={siteConfig.description}>
-  <div class='container mx-auto max-w-4xl px-4 py-10'>
-    <div class='space-y-8'>
-      {
-        page.data.map((read) => (
-          <article class='border-b pb-8 last:border-b-0 last:pb-0'>
-            <div class='text-muted-foreground mb-3 flex items-center gap-4 text-sm'>
+  <div class='divide-border divide-y'>
+    {
+      page.data.map((read) => (
+        <article class='py-10 md:py-12'>
+          <div class='grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-4'>
+            <aside class='text-muted-foreground col-span-1 text-sm md:text-right'>
               <time datetime={read.data.dateAdded.toISOString()}>{formatDate(read.data.dateAdded)}</time>
-
-              {/* 4. This is the updated rendering logic for tags */}
-              <div class='flex flex-wrap gap-1'>
+              <div class='mt-2 flex flex-wrap gap-x-2 gap-y-1 md:justify-end'>
                 {read.data.tags.slice(0, 3).map((tagSlug) => {
-                  // Find the full tag object using the slug from the post's frontmatter
                   const tag = allTagInfo.find((t) => t.slug === tagSlug);
-                  // If for some reason the tag doesn't exist, skip rendering it
                   if (!tag) return null;
-
                   return (
-                    <Badge as='a' href={`/tags/${tag.slug}/`} variant='secondary' class='font-normal'>
-                      {tag.title} {/* <-- Display the human-readable title */}
-                    </Badge>
+                    <a href={`/tags/${tag.slug}/`} class='hover:text-primary relative transition-colors'>
+                      {tag.title}
+                    </a>
                   );
                 })}
               </div>
-            </div>
+            </aside>
 
-            <h2 class='text-foreground mb-3 text-2xl font-bold tracking-tight'>
-              <a href={`/read/${read.id}/`} class='hover:text-primary transition-colors'>
-                {read.data.title}
+            <div class='col-span-1 md:col-span-3'>
+              <h2 class='text-foreground text-2xl leading-snug font-bold tracking-tight sm:text-3xl'>
+                <a
+                  href={`/read/${read.id}/`}
+                  class='from-primary to-primary bg-gradient-to-r bg-[length:0%_2px] bg-left-bottom bg-no-repeat transition-all duration-200 hover:bg-[length:100%_2px]'
+                >
+                  {read.data.title}
+                </a>
+              </h2>
+
+              {read.data.summary && (
+                <p class='text-muted-foreground mt-3 line-clamp-3 text-base leading-relaxed'>{read.data.summary}</p>
+              )}
+
+              <a
+                href={`/read/${read.id}/`}
+                class='group text-primary mt-4 inline-flex items-center text-sm font-medium'
+              >
+                <span>Read full story</span>
+                <Icon name='lucide:arrow-right' class='ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-1' />
               </a>
-            </h2>
-
-            {read.data.summary && (
-              <p class='text-muted-foreground mb-4 line-clamp-3 text-base leading-relaxed'>{read.data.summary}</p>
-            )}
-
-            <a
-              href={`/read/${read.id}/`}
-              class='text-primary inline-flex items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-80'
-            >
-              Read more
-              <Icon name='lucide:arrow-right' class='h-4 w-4' />
-            </a>
-          </article>
-        ))
-      }
-    </div>
-
-    {
-      page.data.length === 0 && (
-        <div class='bg-muted/50 flex flex-col items-center justify-center rounded-lg border-2 border-dashed py-24 text-center'>
-          {/* ... Empty state ... */}
-        </div>
-      )
-    }
-
-    {
-      page.lastPage > 1 && (
-        <div class='mt-12'>
-          <Pagination {page} />
-        </div>
-      )
+            </div>
+          </div>
+        </article>
+      ))
     }
   </div>
+
+  {
+    page.lastPage > 1 && (
+      <div class='mt-12'>
+        <Pagination {page} />
+      </div>
+    )
+  }
+
+  {
+    page.data.length === 0 && (
+      <div class='border-border flex flex-col items-center justify-center rounded-lg border-2 border-dashed py-24 text-center'>
+        <Icon name='lucide:archive' class='text-muted-foreground h-12 w-12' />
+        <h2 class='text-foreground mt-4 text-2xl font-semibold tracking-tight'>No Reads Yet</h2>
+        <p class='text-muted-foreground mt-2'>Check back later for new articles and insights.</p>
+      </div>
+    )
+  }
 </Layout>
+
 <script>
-  // This script is unrelated to tags and can remain as is.
   const urlParams = new URLSearchParams(window.location.hash.substring(1));
   const tokenTypes = ['invite_token', 'confirmation_token', 'recovery_token', 'email_change_token'];
   tokenTypes.forEach((tokenType) => {

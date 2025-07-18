@@ -1,62 +1,82 @@
 ---
 import { Icon } from 'astro-icon/components';
-import Button from '@/components/ui/button.astro';
 import { siteConfig } from '@/config/site.config';
 ---
 
-<footer class='bg-background border-t'>
-  <div class='container mx-auto px-4'>
-    <!-- Main Footer Content: Branding and Newsletter -->
-    <div class='grid gap-12 py-12 lg:grid-cols-12'>
-      <!-- Branding & Description -->
-      <div class='space-y-4 lg:col-span-5'>
-        <div class='flex items-center gap-3'>
-          <div class='bg-primary text-primary-foreground flex size-10 shrink-0 items-center justify-center rounded-lg'>
-            <Icon name='lucide:book-open' class='h-6 w-6' />
+<footer class='border-border bg-background border-t font-sans'>
+  <div class='container'>
+    {/* Main footer content area with generous vertical padding. */}
+    <div class='grid grid-cols-1 gap-x-8 gap-y-12 py-16 md:grid-cols-12'>
+      {/* Left Column: Site identity, now perfectly matching the header's logo style. */}
+      <div class='space-y-4 md:col-span-5'>
+        <a href='/' class='flex items-center gap-2.5' aria-label={`${siteConfig.title} Homepage`}>
+          {/* Logomark: Identical styling to the header for brand consistency. */}
+          <div class='bg-muted/50 flex size-8 items-center justify-center rounded-lg border'>
+            <Icon name='lucide:book-open' class='text-muted-foreground h-4 w-4' />
           </div>
-          <a href='/' class='text-foreground text-2xl font-bold'>{siteConfig.title}</a>
-        </div>
-        <p class='text-muted-foreground max-w-md'>
+          {/* Logotype: Uses the same font style as the header. */}
+          <span class='text-foreground font-sans text-xl font-bold'>{siteConfig.title}</span>
+        </a>
+        <p class='text-muted-foreground text-base'>
           {siteConfig.description}
         </p>
       </div>
 
-      <!-- Newsletter Signup -->
-      <div class='space-y-4 lg:col-span-5 lg:col-start-8'>
-        <h3 class='text-foreground text-lg font-semibold'>Join the Digest</h3>
-        <p class='text-muted-foreground'>Get the latest reads and insights delivered directly to your inbox.</p>
+      {/* Right Column: A cleaner, more direct newsletter signup. */}
+      <div class='md:col-span-5 lg:col-start-9'>
+        <h3 class='text-foreground font-semibold'>Join the Digest</h3>
+        <p class='text-muted-foreground mt-1 mb-4 text-base'>Get the latest insights delivered to your inbox.</p>
         <form class='flex w-full max-w-md gap-2'>
+          <label for='footer-email-input' class='sr-only'>Email address</label>
           <input
+            id='footer-email-input'
             type='email'
             placeholder='your@email.com'
-            class='border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
-            aria-label='Email address'
+            class='border-input bg-background placeholder:text-muted-foreground ring-offset-background focus-visible:ring-ring h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
           />
-          <Button type='submit' aria-label='Subscribe'> Subscribe </Button>
+          <button
+            type='submit'
+            aria-label='Subscribe'
+            class='bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring inline-flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
+          >
+            Sign Up
+          </button>
         </form>
       </div>
     </div>
 
-    <!-- Bottom Bar: Copyright, Legal, and Socials -->
-    <div class='flex flex-col-reverse items-center justify-between gap-6 border-t py-6 md:flex-row'>
+    {/* Bottom bar: Contains copyright, legal links, and polished social icons. */}
+    <div class='border-border flex flex-col-reverse items-center justify-between gap-6 border-t py-8 md:flex-row'>
       <p class='text-muted-foreground text-sm'>
         © {new Date().getFullYear()}
         {siteConfig.title}. All Rights Reserved.
       </p>
-      <nav class='flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm'>
-        <!-- Assuming these are your primary navigation/legal links -->
+
+      <nav
+        class='flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm'
+        aria-label='Footer legal and social links'
+      >
         <a href='/privacy-policy' class='text-muted-foreground hover:text-primary transition-colors'>Privacy Policy</a>
         <a href='/terms-of-use' class='text-muted-foreground hover:text-primary transition-colors'>Terms of Use</a>
+
+        {/* Social Links: Styled as icon-only buttons for consistency with the header. */}
+        <div class='flex items-center gap-2'>
+          <a
+            href='#'
+            aria-label='Twitter'
+            class='text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-8 items-center justify-center rounded-full transition-colors'
+          >
+            <Icon name='lucide:twitter' class='h-4 w-4' />
+          </a>
+          <a
+            href='#'
+            aria-label='GitHub'
+            class='text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-8 items-center justify-center rounded-full transition-colors'
+          >
+            <Icon name='lucide:github' class='h-4 w-4' />
+          </a>
+        </div>
       </nav>
-      <div class='flex items-center gap-1'>
-        <!-- Example social links. Update these in your siteConfig. -->
-        <Button href='#' variant='ghost' size='icon' aria-label='Twitter'>
-          <Icon name='lucide:twitter' class='h-4 w-4' />
-        </Button>
-        <Button href='#' variant='ghost' size='icon' aria-label='GitHub'>
-          <Icon name='lucide:github' class='h-4 w-4' />
-        </Button>
-      </div>
     </div>
   </div>
 </footer>

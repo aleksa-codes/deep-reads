@@ -10,13 +10,11 @@ export const getStaticPaths = (async ({ paginate }) => {
   const allReads = await getCollection('reads');
   const allTags = await getCollection('tags');
 
-  // Map over the definitive list of tags from the 'tags' collection
   const tagData = allTags.map((tag) => {
-    // For each tag, find how many reads reference its slug
     const relatedReads = allReads.filter((read) => read.data.tags.includes(tag.id));
     return {
-      title: tag.data.title, // The display name, e.g., "Artificial Intelligence"
-      slug: tag.id, // The URL-friendly slug, e.g., "artificial-intelligence"
+      title: tag.data.title,
+      slug: tag.id,
       count: relatedReads.length,
       recentReads: relatedReads.sort((a, b) => b.data.dateAdded.valueOf() - a.data.dateAdded.valueOf()).slice(0, 3),
     };
@@ -33,68 +31,57 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { page, totalReads, allTagsCount } = Astro.props;
 ---
 
-<Layout title='Browse Tags - DeepReads' description='Explore all topics and tags on DeepReads'>
-  <div class='container mx-auto px-4 py-10'>
-    <div class='mb-8 text-center'>
-      <h2 class='text-foreground text-3xl font-bold tracking-tight sm:text-4xl'>Explore Topics</h2>
-      <p class='text-muted-foreground mt-2 text-lg'>
-        Page {page.currentPage} of {page.lastPage} • Discover content from {allTagsCount} unique tags.
-      </p>
-    </div>
+<Layout title='Browse Topics' description='Explore all topics and tags on DeepReads'>
+  <!-- PAGE HEADER: Uses serif font for the main title for an editorial feel. -->
+  <header class='mb-12 text-center'>
+    <h1 class='text-foreground font-serif text-4xl font-bold tracking-tight sm:text-5xl'>Explore Topics</h1>
+    <!-- STATS: Integrated into a clean, single line of text instead of heavy cards. -->
+    <p class='text-muted-foreground mt-4 text-lg'>
+      Discover {allTagsCount} topics across {totalReads} articles.
+    </p>
+  </header>
 
-    <div class='mx-auto max-w-7xl'>
-      <div class='mb-12 grid grid-cols-1 gap-6 text-center md:grid-cols-3'>
-        <div class='bg-card rounded-xl border p-6 shadow-sm'>
-          <h3 class='text-muted-foreground text-sm font-medium uppercase'>Total Tags</h3>
-          <p class='text-foreground mt-2 text-4xl font-bold tracking-tight'>{allTagsCount}</p>
-        </div>
-        <div class='bg-card rounded-xl border p-6 shadow-sm'>
-          <h3 class='text-muted-foreground text-sm font-medium uppercase'>Total Reads</h3>
-          <p class='text-foreground mt-2 text-4xl font-bold tracking-tight'>{totalReads}</p>
-        </div>
-        <div class='bg-card rounded-xl border p-6 shadow-sm'>
-          <h3 class='text-muted-foreground text-sm font-medium uppercase'>Top Tag Posts</h3>
-          <p class='text-foreground mt-2 text-4xl font-bold tracking-tight'>{page.data[0]?.count || 0}</p>
-        </div>
-      </div>
-
-      <div class='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
-        {
-          page.data.map(({ title, slug, count, recentReads }) => (
-            <a
-              href={`/tags/${slug}/`}
-              class='group bg-card hover:border-primary flex flex-col justify-between rounded-xl border p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg'
-            >
-              <div>
-                <div class='mb-4 flex items-start justify-between gap-4'>
-                  <h3 class='text-foreground group-hover:text-primary text-xl font-semibold'>{title}</h3>
-                  <Badge variant='secondary'>{count} posts</Badge>
-                </div>
-                <div class='border-t pt-4'>
-                  <h4 class='text-muted-foreground mb-3 text-sm font-medium'>Recent in this topic:</h4>
-                  <div class='space-y-3'>
-                    {recentReads.map((read) => (
-                      <div class='flex items-start gap-2 text-sm'>
-                        <Icon name='lucide:file-text' class='text-muted-foreground mt-0.5 h-4 w-4 shrink-0' />
-                        <span class='text-secondary-foreground line-clamp-2'>{read.data.title}</span>
-                      </div>
-                    ))}
-                    {count > 3 && <div class='text-muted-foreground pt-2 text-xs'>+ {count - 3} more</div>}
-                  </div>
-                </div>
-              </div>
-            </a>
-          ))
-        }
-      </div>
-
-      {
-        page.lastPage > 1 && (
-          <div class='mt-12'>
-            <Pagination {page} />
+  <!-- GRID OF TAGS: Uses a responsive grid with ample spacing. -->
+  <div class='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+    {
+      page.data.map(({ title, slug, count, recentReads }) => (
+        // TAG CARD: The entire card is a link, with a simple border and a subtle background change on hover.
+        // This removes the distracting shadow and lift effect.
+        <a
+          href={`/tags/${slug}/`}
+          class='group border-border hover:border-primary hover:bg-muted/50 block rounded-lg border bg-transparent p-6 transition-colors'
+        >
+          <div class='flex items-start justify-between gap-4'>
+            {/* Tag title is the primary element. */}
+            <h2 class='text-foreground group-hover:text-primary text-xl font-bold transition-colors'>{title}</h2>
+            {/* A subtle badge for the post count. */}
+            <Badge variant='secondary' class='font-medium'>
+              {count} Articles
+            </Badge>
           </div>
-        )
-      }
-    </div>
+
+          {/* List of recent reads. The top border is removed for a cleaner look. */}
+          <div class='mt-4 space-y-2 pt-4'>
+            {recentReads.length > 0 ? (
+              recentReads.map((read) => (
+                // Each recent read is just a clean line of text. The icon is removed to reduce clutter.
+                <p class='text-muted-foreground line-clamp-2 text-sm'>{read.data.title}</p>
+              ))
+            ) : (
+              <p class='text-muted-foreground text-sm'>No recent articles in this topic.</p>
+            )}
+          </div>
+        </a>
+      ))
+    }
   </div>
+
+  <!-- PAGINATION: Centered with ample top margin for separation. -->
+  {
+    page.lastPage > 1 && (
+      <div class='mt-16'>
+        <Pagination {page} />
+      </div>
+    )
+  }
 </Layout>

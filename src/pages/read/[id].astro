@@ -1,99 +1,111 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getCollection, getEntry, render } from 'astro:content';
 import Layout from '@/layouts/layout.astro';
-import Badge from '@/components/ui/badge.astro';
-import Button from '@/components/ui/button.astro';
 import { Icon } from 'astro-icon/components';
-import { tagToSlug } from '@/lib/utils';
 import LikeButton from '@/components/like-button';
 
 export async function getStaticPaths() {
   const reads = await getCollection('reads');
   return reads.map((read) => ({
     params: { id: read.id },
-    props: { read },
+    props: { readId: read.id },
   }));
 }
 
-const { read } = Astro.props;
+const { readId } = Astro.props;
+const read = await getEntry('reads', readId);
+if (!read) return Astro.redirect('/404');
+
+// Fetch all tags to get the display title from a slug
+const allTags = await getCollection('tags');
+const tagMap = new Map(allTags.map((t) => [t.id, t.data.title]));
+
 const { Content } = await render(read);
 
 const formatDate = (date: Date) => {
-  return date.toLocaleDateString('en-US', {
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  });
+  }).format(date);
 };
 ---
 
-<Layout title={`${read.data.title} - DeepReads`} description={read.data.summary || `Read about ${read.data.title}`}>
-  <article class='container mx-auto max-w-4xl px-4 py-12'>
-    <!-- Article Header -->
-    <header class='mb-8 border-b pb-8'>
-      <div class='text-muted-foreground mb-4 flex items-center space-x-4 text-sm'>
-        <span>Added on {formatDate(read.data.dateAdded)}</span>
-      </div>
-      <h1 class='text-foreground mb-4 text-3xl font-extrabold tracking-tight lg:text-5xl'>
-        {read.data.title}
-      </h1>
-      {read.data.summary && <p class='text-muted-foreground text-lg lg:text-xl'>{read.data.summary}</p>}
-      <!-- Tags -->
-      <div class='mt-6 flex flex-wrap gap-2'>
+<Layout title={`${read.data.title}`} description={read.data.summary || `Read about ${read.data.title}`}>
+  {/* Using max-w-3xl for the article itself provides optimal line length for readability. */}
+  <!-- ARTICLE HEADER: Clean, with strong typographic hierarchy. -->
+  <header class='border-border mb-8 border-b pb-8'>
+    <!-- Metadata: Subtle, using sans-serif for clarity. -->
+    <div class='text-muted-foreground mb-4 flex flex-wrap items-center gap-x-4 font-sans text-sm'>
+      <time datetime={read.data.dateAdded.toISOString()}>{formatDate(read.data.dateAdded)}</time>
+      {read.data.tags.length > 0 && <span aria-hidden='true'>•</span>}
+      <div class='flex flex-wrap items-center gap-x-3'>
         {
-          read.data.tags.map((tag) => (
-            <Badge as='a' href={`/tags/${tagToSlug(tag)}/`} variant='secondary'>
-              #{tag}
-            </Badge>
-          ))
+          read.data.tags.map((tagSlug) => {
+            const tagTitle = tagMap.get(tagSlug);
+            if (!tagTitle) return null;
+            return (
+              <a href={`/tags/${tagSlug}/`} class='hover:text-primary transition-colors'>
+                {tagTitle}
+              </a>
+            );
+          })
         }
       </div>
-    </header>
+    </div>
 
-    <!-- Main Content -->
-    <main class='py-4'>
-      <div class='prose prose-slate dark:prose-invert max-w-none'>
-        <Content />
-      </div>
+    <!-- Headline: Large, serif font for an elegant, editorial feel. -->
+    <h1 class='text-foreground font-serif text-4xl leading-tight font-bold tracking-tight sm:text-5xl'>
+      {read.data.title}
+    </h1>
 
-      <!-- Action Buttons -->
-      <div class='mt-10 flex flex-wrap items-center gap-4 border-t pt-8'>
-        <Button href={read.data.url} target='_blank' rel='noopener noreferrer' size='lg'>
-          <Icon name='lucide:external-link' class='mr-2 h-4 w-4' />
-          Read Original
-        </Button>
+    <!-- Summary/Deck: Provides context, with a slightly larger font size than the body. -->
+    {read.data.summary && <p class='text-muted-foreground mt-4 text-xl'>{read.data.summary}</p>}
+  </header>
 
-        {/* The LikeButton is now simpler */}
+  <!-- MAIN CONTENT: Styled with `prose` for optimal readability. -->
+  <div
+    class='prose prose-lg dark:prose-invert prose-p:text-foreground/90 prose-headings:font-serif prose-headings:text-foreground prose-a:text-primary prose-strong:text-foreground max-w-none'
+  >
+    <Content />
+  </div>
+
+  <!-- POST-ARTICLE FOOTER: Contains actions and source info, cleanly separated. -->
+  <footer class='border-border mt-12 border-t pt-8'>
+    <div class='flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between'>
+      <!-- Actions are grouped and made more subtle. -->
+      <div class='flex items-center gap-2'>
         <LikeButton client:load readId={read.id} />
 
-        <Button href='#' variant='outline' size='lg'>
-          <Icon name='lucide:share-2' class='mr-2 h-4 w-4' />
-          Share
-        </Button>
+        <a
+          href='#'
+          aria-label='Share this article'
+          class='text-muted-foreground hover:text-primary inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors'
+        >
+          <Icon name='lucide:share-2' class='h-5 w-5' />
+        </a>
       </div>
 
-      <!-- Source Info Box -->
-      <div class='bg-muted mt-12 rounded-lg border p-6'>
-        <div class='flex items-start gap-4'>
-          <Icon name='lucide:info' class='text-muted-foreground h-5 w-5 shrink-0' />
-          <div>
-            <h3 class='text-foreground font-semibold'>About This Entry</h3>
-            <div class='text-muted-foreground mt-1 space-y-2 text-sm'>
-              <p>
-                This content was originally published at{' '}
-                <a
-                  href={read.data.url}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  class='text-primary font-medium underline-offset-4 hover:underline'
-                >
-                  {new URL(read.data.url).hostname}
-                </a>.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-  </article>
+      <!-- The "Read Original" link is the primary CTA, styled consistently. -->
+      <a
+        href={read.data.url}
+        target='_blank'
+        rel='noopener noreferrer'
+        class='group text-primary inline-flex items-center text-base font-medium'
+      >
+        <span>Read the original story</span>
+        <Icon name='lucide:arrow-right' class='ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-1' />
+      </a>
+    </div>
+
+    <!-- Source info is integrated subtly as a footnote. -->
+    <p class='text-muted-foreground mt-6 text-center text-sm sm:text-left'>
+      Originally published at <a
+        href={read.data.url}
+        target='_blank'
+        rel='noopener noreferrer'
+        class='hover:text-primary'>{new URL(read.data.url).hostname.replace('www.', '')}</a
+      >.
+    </p>
+  </footer>
 </Layout>

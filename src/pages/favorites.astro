@@ -5,13 +5,14 @@ import { db } from '@/lib/db';
 import { favorites } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 import { getCollection } from 'astro:content';
+import { Icon } from 'astro-icon/components';
 
 export const prerender = false;
 
 // 1. Get session and protect the route
 const session = await auth.api.getSession({ headers: Astro.request.headers });
 if (!session?.user) {
-  return Astro.redirect('/'); // Redirect if not logged in
+  return Astro.redirect('/');
 }
 
 // 2. Fetch all of the user's favorite IDs from the DB
@@ -21,37 +22,89 @@ const userFavorites = await db
   .where(eq(favorites.userId, session.user.id));
 const favoriteReadIds = new Set(userFavorites.map((fav) => fav.readId));
 
-// 3. Fetch all reads from the content collection and filter them
+// 3. Fetch all reads and tags to build the list
 const allReads = await getCollection('reads');
+const allTags = await getCollection('tags');
 const favoriteReads = allReads.filter((read) => favoriteReadIds.has(read.id));
+
+// Create a mapping of slug to title for easy tag lookup
+const tagMap = new Map(allTags.map((t) => [t.id, t.data.title]));
+
+// Consistent date formatting
+const formatDate = (date: Date) => {
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+};
 ---
 
 <Layout title='My Favorites' description='A list of your saved articles.'>
-  <div class='container mx-auto max-w-4xl px-4 py-10'>
-    <div class='mb-8 border-b pb-8 text-center'>
-      <h1 class='text-foreground text-4xl font-extrabold tracking-tight'>My Favorites</h1>
-      <p class='text-muted-foreground mt-2 text-lg'>
-        You have saved {favoriteReads.length} article{favoriteReads.length !== 1 ? 's' : ''}.
-      </p>
-    </div>
+  <!-- PAGE HEADER: Clean, centered, and uses serif font for the title. -->
+  <header class='border-border mb-12 border-b pb-8 text-center'>
+    <h1 class='text-foreground font-serif text-4xl font-bold tracking-tight sm:text-5xl'>My Favorites</h1>
+    <p class='text-muted-foreground mt-4 text-lg'>
+      You have saved {favoriteReads.length} article{favoriteReads.length !== 1 ? 's' : ''}.
+    </p>
+  </header>
 
-    <div class='space-y-8'>
-      {
-        favoriteReads.length > 0 ? (
-          favoriteReads.map((read) => (
-            <article>
-              <h2 class='text-foreground mb-2 text-2xl font-bold tracking-tight'>
-                <a href={`/read/${read.id}/`} class='hover:text-primary transition-colors'>
-                  {read.data.title}
+  {
+    favoriteReads.length > 0 ? (
+      <div class='divide-border divide-y'>
+        {favoriteReads.map((read) => (
+          <article class='py-10 md:py-12'>
+            <div class='grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-4'>
+              <aside class='text-muted-foreground col-span-1 text-sm md:text-right'>
+                <time datetime={read.data.dateAdded.toISOString()}>{formatDate(read.data.dateAdded)}</time>
+                <div class='mt-2 flex flex-wrap gap-x-2 gap-y-1 md:justify-end'>
+                  {read.data.tags.slice(0, 3).map((tagSlug) => {
+                    const tagTitle = tagMap.get(tagSlug);
+                    if (!tagTitle) return null;
+                    return (
+                      <a href={`/tags/${tagSlug}/`} class='hover:text-primary relative transition-colors'>
+                        {tagTitle}
+                      </a>
+                    );
+                  })}
+                </div>
+              </aside>
+
+              <div class='col-span-1 md:col-span-3'>
+                <h2 class='text-foreground text-2xl leading-snug font-bold tracking-tight sm:text-3xl'>
+                  <a
+                    href={`/read/${read.id}/`}
+                    class='from-primary to-primary bg-gradient-to-r bg-[length:0%_2px] bg-left-bottom bg-no-repeat transition-all duration-200 hover:bg-[length:100%_2px]'
+                  >
+                    {read.data.title}
+                  </a>
+                </h2>
+
+                {read.data.summary && (
+                  <p class='text-muted-foreground mt-3 line-clamp-3 text-base leading-relaxed'>{read.data.summary}</p>
+                )}
+
+                <a
+                  href={`/read/${read.id}/`}
+                  class='group text-primary mt-4 inline-flex items-center text-sm font-medium'
+                >
+                  <span>Read full story</span>
+                  <Icon
+                    name='lucide:arrow-right'
+                    class='ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-1'
+                  />
                 </a>
-              </h2>
-              <p class='text-muted-foreground line-clamp-2 text-base leading-relaxed'>{read.data.summary}</p>
-            </article>
-          ))
-        ) : (
-          <p class='text-muted-foreground text-center'>You haven't favorited any articles yet.</p>
-        )
-      }
-    </div>
-  </div>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <div class='border-border flex flex-col items-center justify-center rounded-lg border-2 border-dashed py-24 text-center'>
+        <Icon name='lucide:heart-off' class='text-muted-foreground h-12 w-12' />
+        <h2 class='text-foreground mt-4 text-2xl font-semibold tracking-tight'>No Favorites Yet</h2>
+        <p class='text-muted-foreground mt-2'>Click the heart icon on any article to save it here.</p>
+      </div>
+    )
+  }
 </Layout>

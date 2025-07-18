@@ -115,13 +115,11 @@ export default function Search() {
       <button
         type='button'
         onClick={() => setIsOpen(true)}
-        className='border-input bg-background text-muted-foreground ring-offset-background hover:bg-accent hover:text-accent-foreground flex h-10 w-full max-w-md items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition-colors'
+        aria-label='Search articles'
+        className='text-muted-foreground hover:bg-accent hover:text-accent-foreground border-input inline-flex h-10 w-10 items-center justify-center rounded-md border bg-transparent transition-colors'
       >
-        <div className='flex items-center gap-2'>
-          <SearchIcon className='h-4 w-4' />
-          <span>Search articles...</span>
-        </div>
-        <kbd className='bg-muted pointer-events-none hidden h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none sm:flex'>
+        <SearchIcon className='h-5 w-5' />
+        <kbd className='bg-muted pointer-events-none absolute -top-8 right-0 hidden h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none group-hover:flex'>
           <span className='text-xs'>⌘</span>K
         </kbd>
       </button>

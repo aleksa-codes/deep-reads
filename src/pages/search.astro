@@ -3,28 +3,33 @@
 import { getCollection } from 'astro:content';
 import Layout from '@/layouts/layout.astro';
 import SearchResults from '@/components/search-results';
-import type { ReadItem } from './api/search.json';
+import type { ReadItem } from '@/components/search-results'; // Import type from component
 
-// This page must be server-rendered to read URL params
 export const prerender = false;
 
-// 1. Get the search query from the URL, e.g., /search?q=astro
+// 1. Get the search query from the URL
 const query = Astro.url.searchParams.get('q') || '';
 
-// 2. Fetch ALL reads on the server. This is more performant than a client-side fetch
-// as the data is available instantly when the React component loads.
+// 2. Fetch all reads and tags on the server
 const readsCollection = await getCollection('reads');
+const tagsCollection = await getCollection('tags');
+
+// 3. Map the data into the structure the React component expects
 const allReads: ReadItem[] = readsCollection.map((read) => ({
   id: read.id,
   title: read.data.title,
   summary: read.data.summary ?? '',
   tags: read.data.tags,
+  // Pass date as an ISO string for serialization
+  dateAdded: read.data.dateAdded.toISOString(),
+}));
+
+const allTags = tagsCollection.map((tag) => ({
+  slug: tag.id,
+  title: tag.data.title,
 }));
 ---
 
 <Layout title={`Search Results for "${query}"`} description={`Find articles about ${query}`}>
-  <div class='container mx-auto max-w-4xl px-4 py-10'>
-    <!-- 3. Pass the full dataset and the initial query to the React component -->
-    <SearchResults client:load allReads={allReads} initialQuery={query} />
-  </div>
+  <SearchResults client:load allReads={allReads} initialQuery={query} allTags={allTags} />
 </Layout>
