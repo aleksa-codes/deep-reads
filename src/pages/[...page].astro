@@ -15,7 +15,7 @@ export const getStaticPaths = (async ({ paginate }) => {
     title: tag.data.title,
   }));
   return paginate(sortedReads, {
-    pageSize: 7,
+    pageSize: 4,
     props: { allTagInfo },
   });
 }) satisfies GetStaticPaths;

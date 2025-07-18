@@ -5,7 +5,8 @@
   "version": "0.0.1",
   "scripts": {
     "astro": "astro",
-    "dev": "astro dev --host",
+    "dev": "astro dev",
+    "dev:host": "astro dev --host",
     "start": "astro dev",
     "sync": "astro sync",
     "build:tailwind": "bun x @tailwindcss/cli -i src/styles/global.css -o dist/global.css --minify",

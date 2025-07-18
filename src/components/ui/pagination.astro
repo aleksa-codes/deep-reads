@@ -1,4 +1,22 @@
 ---
+import { Icon } from 'astro-icon/components';
+import { cn } from '@/lib/utils';
+
+interface Props {
+  page: {
+    currentPage: number;
+    lastPage: number;
+    url: {
+      prev?: string;
+      next?: string;
+    };
+  };
+}
+
+const { page } = Astro.props;
+---
+
+<!-- ---
 import Button from '@/components/ui/button.astro';
 import { Icon } from 'astro-icon/components';
 
@@ -41,5 +59,40 @@ const { page } = Astro.props;
         <Icon name='lucide:chevron-right' />
       </Button>
     </div>
+  )
+} -->{
+  page.lastPage > 1 && (
+    <nav class='flex items-center justify-between' aria-label='Pagination'>
+      <a
+        href={page.url.prev ?? '#'}
+        class={cn(
+          'inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+          page.url.prev ? 'text-foreground hover:bg-accent' : 'text-muted-foreground/50 pointer-events-none',
+        )}
+        aria-label='Go to previous page'
+        aria-disabled={!page.url.prev}
+      >
+        <Icon name='lucide:arrow-left' class='h-4 w-4' />
+        <span class='hidden sm:inline'>Previous</span>
+      </a>
+
+      <div class='text-muted-foreground font-mono text-sm'>
+        {page.currentPage} of {page.lastPage}
+      </div>
+
+      <a
+        href={page.url.next ?? '#'}
+        class={cn(
+          'inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+          page.url.next ? 'text-foreground hover:bg-accent' : 'text-muted-foreground/50 pointer-events-none',
+        )}
+        aria-label='Go to next page'
+        aria-disabled={!page.url.next}
+      >
+        {/* The text "Next" only appears on small screens and up */}
+        <span class='hidden sm:inline'>Next</span>
+        <Icon name='lucide:arrow-right' class='h-4 w-4' />
+      </a>
+    </nav>
   )
 }
