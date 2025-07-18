@@ -55,8 +55,9 @@ const { page, totalReads, allTagsCount } = Astro.props;
             {/* Tag title is the primary element. */}
             <h2 class='text-foreground group-hover:text-primary text-xl font-bold transition-colors'>{title}</h2>
             {/* A subtle badge for the post count. */}
-            <Badge variant='secondary' class='font-medium'>
-              {count} Articles
+            <Badge variant='secondary' class='shrink-0 font-medium'>
+              <span>{count}</span>
+              <span>{count === 1 ? 'Article' : 'Articles'}</span>
             </Badge>
           </div>
 
