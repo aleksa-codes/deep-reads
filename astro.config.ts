@@ -8,22 +8,24 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
 import netlify from '@astrojs/netlify';
 
+const SITE = import.meta.env.PROD ? siteConfig.url : 'http://localhost:3000';
+
 // https://astro.build/config
 export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  site: import.meta.env.PROD ? siteConfig.url : 'http://localhost:3000',
+  site: SITE,
   server: {
     port: 3000,
   },
   markdown: {
-    rehypePlugins: [[targetBlank, { domain: import.meta.env.PROD ? siteConfig.url : 'http://localhost:3000' }]],
+    rehypePlugins: [[targetBlank, { domain: SITE }]],
   },
   integrations: [
     icon(),
     sitemap({
-      filter: (page) => page !== `${siteConfig.url}/admin/`,
+      filter: (page) => page !== `${SITE}/admin/`,
     }),
     compress({
       CSS: true,

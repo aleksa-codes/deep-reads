@@ -1,47 +1,31 @@
-# Astro Starter Kit: Minimal
+# DeepReads 📚
 
-```sh
-npm create astro@latest -- --template minimal
-```
+DeepReads is a high-performance discovery and bookmarking platform for **long-form content**. Originally built for a client who ghosted, it's now a template for **Astro 6**, **Better Auth**, and **Drizzle ORM** integrations.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/minimal)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/minimal)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/minimal/devcontainer.json)
+## 🚀 The App
+- **High-Quality Discovery**: Discover curated long-form articles, research, and essays.
+- **Smart Bookmarking**: Save and organize your favorite reads (stored in D1/SQLite).
+- **Hybrid Data Model**: Uses **Astro Content Collections** for zero-latency content and **Drizzle/SQL** for user-specific data.
+- **Instant Search**: Pre-built search index powered by `fuse.js`.
+- **Premium Design**: Modern, typography-first aesthetic built with **Tailwind CSS v4**.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## 🛠️ Tech Stack
+- **Framework**: Astro 6 (React for interactions)
+- **Auth**: Better Auth (GitHub OAuth ready)
+- **ORM**: Drizzle (with custom D1 HTTP Proxy driver for prod)
+- **DB**: SQLite (Local) / Cloudflare D1 (Production)
+- **Search**: Fuse.js
 
-## 🚀 Project Structure
+## 🏁 Getting Started
+1. **Clone & Install**: `bun install`
+2. **Setup Env**: `cp .env.example .env` (Add Cloudflare & Auth keys)
+3. **Init DB**: `bun run db:push`
+4. **Run**: `bun run dev`
 
-Inside of your Astro project, you'll see the following folders and files:
+### Database Commands
+- `bun run db:push`: Update **LOCAL** SQLite.
+- `bun run db:push:prod`: Update **PRODUCTION** D1.
+- `bun run db:studio`: Explore your local data.
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## 📝 License
+Released under the [MIT License](LICENSE) as an open-source example and starter kit.

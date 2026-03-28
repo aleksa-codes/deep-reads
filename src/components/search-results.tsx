@@ -69,7 +69,7 @@ export default function SearchResults({ allReads, initialQuery, allTags }: Searc
 
   const results = initialQuery.length >= 2 ? fuse.search(initialQuery) : [];
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (query.length > 0) {
       window.location.href = `/search?q=${encodeURIComponent(query)}`;
@@ -125,7 +125,7 @@ export default function SearchResults({ allReads, initialQuery, allTags }: Searc
                     <h2 className='text-foreground text-2xl leading-snug font-bold tracking-tight sm:text-3xl'>
                       <a
                         href={`/read/${item.id}/`}
-                        className='from-primary to-primary bg-gradient-to-r bg-[length:0%_2px] bg-left-bottom bg-no-repeat transition-all duration-200 hover:bg-[length:100%_2px]'
+                        className='from-primary to-primary bg-linear-to-r bg-size-[0%_2px] bg-bottom-left bg-no-repeat transition-all duration-200 hover:bg-size-[100%_2px]'
                         dangerouslySetInnerHTML={{ __html: highlight(item.title, initialQuery) }}
                       />
                     </h2>

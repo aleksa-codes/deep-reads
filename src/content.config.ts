@@ -1,5 +1,6 @@
-import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { z } from 'astro/zod';
+import { defineCollection } from 'astro:content';
 
 // Define the schema for a single "read"
 const reads = defineCollection({
@@ -7,7 +8,7 @@ const reads = defineCollection({
   schema: () =>
     z.object({
       title: z.string(),
-      url: z.string().url(),
+      url: z.url(),
       summary: z.string().optional(),
       // 'tags' now stores an array of slugs (strings) which are foreign keys to the 'tags' collection
       tags: z.array(z.string()).default([]),

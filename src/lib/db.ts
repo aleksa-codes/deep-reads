@@ -1,20 +1,23 @@
-// src/lib/db.ts
-// import { drizzle } from 'drizzle-orm/libsql';
-// import { createClient } from '@libsql/client';
-import { d1HttpDriver } from '@/lib/d1-http-driver';
+import { drizzle } from 'drizzle-orm/libsql';
+import { createClient } from '@libsql/client';
 import { drizzle as drizzleProxy } from 'drizzle-orm/sqlite-proxy';
+import { d1HttpDriver } from './d1-http-driver';
 
-// Create a client that connects to a local file
-// const localClient = createClient({
-//   url: 'file:./sqlite.db',
-// });
+function createDbClient() {
+  // Use import.meta.env.PROD (Astro) or process.env.NODE_ENV (Node/Bun) to check environment
+  const isProd = import.meta.env?.PROD || process.env.NODE_ENV === 'production';
 
-// export const db = import.meta.env.PROD ? drizzle(localClient) : drizzleProxy(d1HttpDriver);
+  if (isProd) {
+    console.log('Using Production D1 Database (HTTP Proxy)');
+    return drizzleProxy(d1HttpDriver);
+  }
 
-// export const db = process.env.NODE_ENV === 'production' ? drizzleProxy(d1HttpDriver) : drizzle(localClient);
+  console.log('Using Local SQLite Database (LibSQL)');
+  // Local development client
+  const localClient = createClient({
+    url: 'file:./sqlite.db',
+  });
+  return drizzle(localClient);
+}
 
-// prod:
-export const db = drizzleProxy(d1HttpDriver);
-
-// dev:
-// export const db = drizzle(localClient);
+export const db = createDbClient();

@@ -1,6 +1,9 @@
 import ky from 'ky';
 
-const { CLOUDFLARE_D1_TOKEN, CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_D1_DATABASE_ID } = process.env;
+// Destructure environment variables - preferring import.meta.env for Astro compatibility
+const CLOUDFLARE_D1_TOKEN = import.meta.env.CLOUDFLARE_D1_TOKEN || process.env.CLOUDFLARE_D1_TOKEN;
+const CLOUDFLARE_ACCOUNT_ID = import.meta.env.CLOUDFLARE_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
+const CLOUDFLARE_D1_DATABASE_ID = import.meta.env.CLOUDFLARE_D1_DATABASE_ID || process.env.CLOUDFLARE_D1_DATABASE_ID;
 
 const D1_API_BASE_URL = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${CLOUDFLARE_D1_DATABASE_ID}`;
 
